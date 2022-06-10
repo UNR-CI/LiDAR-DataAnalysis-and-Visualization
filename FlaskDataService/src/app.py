@@ -35,6 +35,7 @@ CORS(app)
 eventlet.monkey_patch()
 lock = threading.Lock()
 threadedData = []
+topics = []
 
 """Function that processes mqtt message and compresses the message.
 Message is threaded and passed into read_pcd function to be parsed
@@ -76,13 +77,14 @@ x.start()
 # App configuration for Flask-MQTT
 app.config['SECRET'] = 'testor key'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['MQTT_BROKER_URL'] = 'ncar-im-0.rc.unr.edu'
+app.config['MQTT_BROKER_URL'] = 'ncar-da-1.rc.unr.edu'
 app.config['MQTT_BROKER_PORT'] = 30041
 app.config['MQTT_USERNAME'] = ''
 app.config['MQTT_PASSWORD'] = ''
 app.config['MQTT_KEEPALIVE'] = 30
-app.config['MQTT_TLS_ENABLED'] = False
+app.config['MQTT_TLS_ENABLED'] = True
 app.config['MQTT_CLEAN_SESSION'] = True
+app.config['MQTT_TLS_CA_CERTS'] = '/etc/ssl/certs/ca-certificates.crt'
 
 # Parameters for SSL enabled
 # app.config['MQTT_BROKER_PORT'] = 8883
@@ -133,8 +135,10 @@ def count_fps_datamesh(timeValue, topicValue):
 # MQTT decorator function to handle connection to broker
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe('test15thVirginiaSE')
-    mqtt.subscribe('test15thVirginiaNW')
+    #mqtt.subscribe('test15thVirginiaSE')
+    #mqtt.subscribe('test15thVirginiaNW')
+    for topic in topics:
+        mqtt.subscribe(topic)
     # mqtt.subscribe('test2')
 
 @socketio.on('subscribe')
@@ -183,6 +187,7 @@ if __name__ == '__main__':
     for line in topicsAvailable:
         fpsDict[line] = 0
         countDict[line] = 0
+        topics.append(line)
     topicFile.close()
 
     # Keep reloader set to false otherwise this will create two Flask instances.

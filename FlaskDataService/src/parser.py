@@ -60,7 +60,7 @@ def parse_header(lines):
             positions['maxz'] = float(coordinates[5])
             positions['class'] = 'Object'
             metadata['objects'].append(positions)
-        match = re.match('(\w+)\s+([\w\s\.]+)', ln)
+        match = re.match('(\w+)\s+([\w\s\.\/]+)', ln)
         if not match:
             warnings.warn("warning: can't understand line: %s" % ln)
             continue
@@ -92,6 +92,7 @@ def parse_header(lines):
         metadata['viewpoint'] = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
     if 'version' not in metadata:
         metadata['version'] = '.7'
+    print(metadata.get('topic','None'))
     return metadata
 
 """ Function builds numpy structured array dtype from the pcl metadata.
