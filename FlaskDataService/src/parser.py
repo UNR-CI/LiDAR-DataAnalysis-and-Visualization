@@ -188,15 +188,16 @@ def read_pcd(content, isfilename=False):
             if ln.startswith(b'DATA'):
                 metadata = parse_header(header)
                 dtype = build_dtype(metadata)
-            elif ln.startswith(b'Time'):
+            elif ln.startswith(b'Time '):
                 metadata = parse_header(header)
                 topic_value = str(metadata['topic'])
                 time_value = int(metadata['time'])
+                print(topic_value)
                 minutes_cal = time_value/6e7
                 minute = int(minutes_cal)
                 break
 
-        skip = content.find(b'Time')
+        skip = content.find(b'Time ')
         skip = skip + content[skip:].find(b'\n')+1
         rowstep = metadata['points'] * dtype.itemsize
         if metadata['data'] == 'ascii':
