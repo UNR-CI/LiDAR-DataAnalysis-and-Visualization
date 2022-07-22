@@ -11,6 +11,7 @@
 #
 # ----------------------------------------------------------------------------------------
 
+import ssl
 import sys
 import eventlet
 import json
@@ -85,6 +86,7 @@ app.config['MQTT_KEEPALIVE'] = 30
 app.config['MQTT_TLS_ENABLED'] = True
 app.config['MQTT_CLEAN_SESSION'] = True
 app.config['MQTT_TLS_CA_CERTS'] = '/etc/ssl/certs/ca-certificates.crt'
+app.config['MQTT_TLS_VERSION'] = ssl.PROTOCOL_SSLv23
 
 # Parameters for SSL enabled
 # app.config['MQTT_BROKER_PORT'] = 8883

@@ -1,5 +1,5 @@
 # Nodejs Base image
-FROM node:14.17.1
+FROM node:14.17.1 as build-stage
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
@@ -13,5 +13,13 @@ RUN npm install
 # Add app into the app folder
 COPY . /app
 
+# Run build command
+RUN ng build --prod
+
+
+FROM nginx:latest
+COPY --from=build-stage /app/dist/LiDarWebApp/ /usr/share/nginx/html
+COPY ./nginx-custom.conf /etc/nginx/conf.d/default.conf
+
 # Run app command
-CMD ng serve --host 0.0.0.0
+#CMD ng serve --host 0.0.0.0 --disableHostCheck

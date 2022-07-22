@@ -12,7 +12,7 @@ import { Observable } from 'rxjs/internal/Observable';
 //Class that connects to Flask App through websockets and emits MQTT messages
 export class MqttSocketService extends Socket {
  constructor() {
-   super({url: 'http://localhost:5000', options: { origin: '*:*' , withCredentials: false} 
+   super({url: 'http://ncar-im-1.rc.unr.edu:31750', options: { origin: '*:*' , withCredentials: false} 
    //, transport : ['websocket']}
    });
  }
