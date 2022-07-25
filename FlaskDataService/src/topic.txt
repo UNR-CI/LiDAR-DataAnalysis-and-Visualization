@@ -3,12 +3,12 @@
 /IM/Test/22/NE
 /IM/Test/22/SW
 /IM/Test/42/NE
-/IM/Test/42/NW
+/IM/Test/42/SW
 /IM/Test/62/NE
 /IM/Test/62/SW
 /IM/Test/142/NE
-/IM/Test/142/SE
+/IM/Test/142/SW
 /IM/Test/162/NE
-/IM/Test/162/SE
+/IM/Test/162/SW
 /IM/Test/182/NE
-/IM/Test/182/SE
+/IM/Test/182/SW
