@@ -1,5 +1,5 @@
 # Nodejs Base image
-FROM node:14.17.1 as build-stage
+FROM node:12.22.12 as build-stage
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
