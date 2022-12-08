@@ -12,27 +12,29 @@
 # ----------------------------------------------------------------------------------------
 
 import sys
-import eventlet
+#import eventlet
 import json
 import time
 import datetime
 import threading
 import zstd
+import uuid
 
-from flask import Flask, render_template, Response
+from flask import Flask, Response
 from flask_cors import CORS
 from flask_mqtt import Mqtt
 from flask_socketio import SocketIO
 from flask_bootstrap import Bootstrap
 from multiprocessing import Queue
 from parser import read_pcd
-
+import DracoPy
+import base64
 # Declare app object and set it to Flask class
 app = Flask(__name__)
 CORS(app)
 
 # Declare threading variables
-eventlet.monkey_patch()
+#eventlet.monkey_patch()
 lock = threading.Lock()
 threadedData = []
 topics = []
@@ -53,21 +55,59 @@ def process_message():
 
             # Release Threading Lock and pass data to parser
             lock.release()
-            values = read_pcd( data['payload'])
+            #print(data['payload'])
 
+            #print(len(data['payload']))
+            
+            values = json.loads(data['payload'])
+            decoded = base64.b64decode(values['file'])
+            points = {}
+            if values['type'] == 'draco':
+            
+                test = DracoPy.decode(decoded)
+                #print(test.points)
+                #print("HERE")
+            
+                #values = read_pcd( data['payload'])
+                x = []
+                y = []
+                z = []
+                intensity = []
+                for i in test.points:
+                    x.append(i[0])
+                    y.append(i[1])
+                    z.append(i[2])
+                    intensity.append(0)
+
+                
+                points['x'] = x
+                points['y'] = y
+                points['z'] = z
+                points['intensity'] = intensity
+                points = json.dumps(json.loads(json.dumps(points), parse_float=lambda x: round(float(x), 2)))
+            elif values['type'] == 'pcd':
+                test = read_pcd(decoded)
+                points = test['points']
+            
             # Compress and store the data and track time of compression
-            start = datetime.datetime.now()
-            data['payload'] = zstd.compress(bytes(values['points'], 'utf-8'))
-            stop = (datetime.datetime.now()-start).total_seconds()
+            #start = datetime.datetime.now()
+            #data['payload'] = zstd.compress(bytes(values['points'], 'utf-8'))
+            data['payload'] = zstd.compress(bytes(points,'utf-8'))
+            #stop = (datetime.datetime.now()-start).total_seconds()
             data['objects'] = values['objects']
-            data['time'] = values['time']
-
+            data['time'] = values['utctime']
+            #data['topic'] = 'test'
+            #print(data)
             # Emits message data and can grab info from the topic
-            socketio.emit('mqtt_message', data=data)
+            socketio.emit('mqtt_message', data='fasdfasdf')
+            socketio.emit('test','foo')
+            print('emit',data['time'])
 
         else:
             lock.release()
         time.sleep(.1)
+        print('emitting')
+        socketio.emit('test','foo')
 
     
 # Threading constructor object
@@ -77,14 +117,16 @@ x.start()
 # App configuration for Flask-MQTT
 app.config['SECRET'] = 'testor key'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['MQTT_BROKER_URL'] = 'ncar-da-1.rc.unr.edu'
+app.config['MQTT_BROKER_URL'] = '134.197.75.31'
 app.config['MQTT_BROKER_PORT'] = 30041
-app.config['MQTT_USERNAME'] = ''
-app.config['MQTT_PASSWORD'] = ''
-app.config['MQTT_KEEPALIVE'] = 30
-app.config['MQTT_TLS_ENABLED'] = True
+#app.config['MQTT_USERNAME'] = ''
+#app.config['MQTT_PASSWORD'] = ''
+app.config['MQTT_KEEPALIVE'] = 1
+app.config['MQTT_TLS_ENABLED'] = False
 app.config['MQTT_CLEAN_SESSION'] = True
-app.config['MQTT_TLS_CA_CERTS'] = '/etc/ssl/certs/ca-certificates.crt'
+app.config['MQTT_CLIENT_ID'] = 'test1' +  str(uuid.uuid1())
+app.config['MQTT_REFRESH_TIME'] = 10.0 
+#app.config['MQTT_TLS_CA_CERTS'] = '/etc/ssl/certs/ca-certificates.crt'
 
 # Parameters for SSL enabled
 # app.config['MQTT_BROKER_PORT'] = 8883
@@ -137,7 +179,9 @@ def count_fps_datamesh(timeValue, topicValue):
 def handle_connect(client, userdata, flags, rc):
     #mqtt.subscribe('test15thVirginiaSE')
     #mqtt.subscribe('test15thVirginiaNW')
+    print("HERE")
     for topic in topics:
+        print(topic)
         mqtt.subscribe(topic)
     # mqtt.subscribe('test2')
 
@@ -191,4 +235,4 @@ if __name__ == '__main__':
     topicFile.close()
 
     # Keep reloader set to false otherwise this will create two Flask instances.
-    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=False, debug=False)
+    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=True, debug=True)

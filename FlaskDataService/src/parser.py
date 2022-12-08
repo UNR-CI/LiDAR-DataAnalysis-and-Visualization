@@ -39,7 +39,6 @@ def parse_header(lines):
     metadata = {
         'objects': []
     }
-
     # Boolean used to search for object coordinates
     searchSwitch = False
 
@@ -126,6 +125,9 @@ def read_pcd(content, isfilename=False):
     # Initialize json dictionary
     jsondict = {}
 
+    topic_value = ''
+    minute = 0
+
     # Loops through pcd file
     if isfilename:
      with open(content, 'rb') as f:
@@ -182,12 +184,16 @@ def read_pcd(content, isfilename=False):
         header = []
         lines = content.split(b'\n')
 
+        regular = content.find(b'Time ') == -1
+
         for ln in lines:
             header.append(ln.decode())
 
             if ln.startswith(b'DATA'):
                 metadata = parse_header(header)
                 dtype = build_dtype(metadata)
+                if regular:
+                    break
             elif ln.startswith(b'Time '):
                 metadata = parse_header(header)
                 topic_value = str(metadata['topic'])
@@ -196,8 +202,8 @@ def read_pcd(content, isfilename=False):
                 minutes_cal = time_value/6e7
                 minute = int(minutes_cal)
                 break
-
-        skip = content.find(b'Time ')
+        
+        skip = content.find(b'Time ') if not regular else content.find(b'DATA ')
         skip = skip + content[skip:].find(b'\n')+1
         rowstep = metadata['points'] * dtype.itemsize
         if metadata['data'] == 'ascii':
@@ -258,6 +264,7 @@ def read_pcd(content, isfilename=False):
         df.drop(col, axis=1, inplace=True)
 
     # Cleaned data stored in data dictionary
+
     data['topic'] = topic_value
     data['time'] = str(minute)
     data['points'] = df.to_json(index = False, orient = 'split')
