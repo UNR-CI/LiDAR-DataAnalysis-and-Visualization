@@ -1,2 +1,1 @@
-/IM/Test/22/NE
-/IM/Test/2/SW
+/IM/15th/2/SE

@@ -55,10 +55,11 @@ def process_message():
 
             # Release Threading Lock and pass data to parser
             lock.release()
+            print('sent')
             #print(data['payload'])
 
             #print(len(data['payload']))
-            
+            #print(data['payload'])
             values = json.loads(data['payload'])
             decoded = base64.b64decode(values['file'])
             points = {}
@@ -99,15 +100,12 @@ def process_message():
             #data['topic'] = 'test'
             #print(data)
             # Emits message data and can grab info from the topic
-            socketio.emit('mqtt_message', data='fasdfasdf')
-            socketio.emit('test','foo')
+            socketio.emit('mqtt_message', data=data)
             print('emit',data['time'])
 
         else:
             lock.release()
         time.sleep(.1)
-        print('emitting')
-        socketio.emit('test','foo')
 
     
 # Threading constructor object
@@ -235,4 +233,4 @@ if __name__ == '__main__':
     topicFile.close()
 
     # Keep reloader set to false otherwise this will create two Flask instances.
-    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=True, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=False, debug=False)
