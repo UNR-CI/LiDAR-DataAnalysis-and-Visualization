@@ -8,3 +8,4 @@ bson
 numpy
 pandas
 zstd
+DracoPy
