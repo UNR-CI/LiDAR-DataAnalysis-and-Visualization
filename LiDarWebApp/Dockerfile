@@ -1,5 +1,5 @@
 # Nodejs Base image
-FROM node:12.22.12 as build-stage
+FROM node:12.22.9 as build-stage
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
@@ -7,6 +7,8 @@ ENV PATH /app/node_modules/.bin:$PATH
 # RUN npm install -g npm@6.14.13
 RUN npm update
 COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+COPY *.json /app/
 RUN npm install -g @angular/cli
 RUN npm install
 
