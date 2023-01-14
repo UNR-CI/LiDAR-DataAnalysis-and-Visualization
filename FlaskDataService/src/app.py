@@ -49,12 +49,12 @@ topics = []
 # App configuration for Flask-MQTT
 app.config['SECRET'] = 'testor key'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['MQTT_BROKER_URL'] = '134.197.75.31'
+app.config['MQTT_BROKER_URL'] = 'ncar-da-1.rc.unr.edu'
 app.config['MQTT_BROKER_PORT'] = 30041
 #app.config['MQTT_USERNAME'] = ''
 #app.config['MQTT_PASSWORD'] = ''
 app.config['MQTT_KEEPALIVE'] = 1
-app.config['MQTT_TLS_ENABLED'] = False
+app.config['MQTT_TLS_ENABLED'] = True
 app.config['MQTT_CLEAN_SESSION'] = True
 app.config['MQTT_REFRESH_TIME'] = 10.0
 app.config['MQTT_TLS_CA_CERTS'] = '/etc/ssl/certs/ca-certificates.crt'
@@ -229,7 +229,7 @@ def process_message():
             data['payload'] = zstd.compress(bytes(points,'utf-8'))
             #stop = (datetime.datetime.now()-start).total_seconds()
             data['objects'] = values['objects']
-            data['time'] = values['utctime']
+            data['time'] = values['timestamp']
             #data['topic'] = 'test'
             #print(data)
             # Emits message data and can grab info from the topic
