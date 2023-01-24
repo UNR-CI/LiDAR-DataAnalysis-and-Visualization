@@ -188,54 +188,59 @@ def process_message():
 
             # Release Threading Lock and pass data to parser
             lock.release()
-            print('sent')
-            #print(data['payload'])
+            try:
+                print('sent')
+                #print(data['payload'])
 
-            print(len(data['payload']))
-            #print(data['payload'])
-            values = json.loads(data['payload'])
-            decoded = base64.b64decode(values['file'])
-            points = {}
-            if values['type'] == 'draco':
-            
-                test = DracoPy.decode(decoded)
-                #print(test.points)
-                #print("HERE")
-            
-                #values = read_pcd( data['payload'])
-                x = []
-                y = []
-                z = []
-                intensity = []
-                for i in test.points:
-                    x.append(i[0])
-                    y.append(i[1])
-                    z.append(i[2])
-                    intensity.append(0)
+                print(len(data['payload']))
+                #print(data['payload'])
+                print(data)
 
+                values = json.loads(data['payload'])
+                decoded = base64.b64decode(values['file'])
+                points = {}
+                if values['type'] == 'draco':
                 
-                points['x'] = x
-                points['y'] = y
-                points['z'] = z
-                points['intensity'] = intensity
-                points = json.dumps(json.loads(json.dumps(points), parse_float=lambda x: round(float(x), 2)))
-            elif values['type'] == 'pcd':
-                test = read_pcd(decoded)
-                points = test['points']
-            
-            # Compress and store the data and track time of compression
-            #start = datetime.datetime.now()
-            #data['payload'] = zstd.compress(bytes(values['points'], 'utf-8'))
-            data['payload'] = zstd.compress(bytes(points,'utf-8'))
-            #stop = (datetime.datetime.now()-start).total_seconds()
-            data['objects'] = values['objects']
-            data['time'] = values['timestamp']
-            #data['topic'] = 'test'
-            #print(data)
-            # Emits message data and can grab info from the topic
-            print(len(data['payload']))
-            socketio.emit('mqtt_message', data=data)
-            print('emit',data['time'])
+                    test = DracoPy.decode(decoded)
+                    #print(test.points)
+                    #print("HERE")
+                
+                    #values = read_pcd( data['payload'])
+                    x = []
+                    y = []
+                    z = []
+                    intensity = []
+                    for i in test.points:
+                        x.append(i[0])
+                        y.append(i[1])
+                        z.append(i[2])
+                        intensity.append(0)
+
+                    
+                    points['x'] = x
+                    points['y'] = y
+                    points['z'] = z
+                    points['intensity'] = intensity
+                    points = json.dumps(json.loads(json.dumps(points), parse_float=lambda x: round(float(x), 2)))
+                elif values['type'] == 'pcd':
+                    test = read_pcd(decoded)
+                    points = test['points']
+                
+                # Compress and store the data and track time of compression
+                #start = datetime.datetime.now()
+                #data['payload'] = zstd.compress(bytes(values['points'], 'utf-8'))
+                data['payload'] = zstd.compress(bytes(points,'utf-8'))
+                #stop = (datetime.datetime.now()-start).total_seconds()
+                data['objects'] = values['objects']
+                data['time'] = values['timestamp']
+                #data['topic'] = 'test'
+                #print(data)
+                # Emits message data and can grab info from the topic
+                print(len(data['payload']))
+                socketio.emit('mqtt_message', data=data)
+                print('emit',data['time'])
+            except:
+                pass
 
         else:
             lock.release()
