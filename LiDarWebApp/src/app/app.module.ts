@@ -26,6 +26,19 @@ import { AboutComponent } from './ui_components/about/about.component';
 import { DataFormComponent } from './ui_components/data-form/data-form.component';
 import { SettingsComponent } from './ui_components/settings/settings.component';
 import { VisualizationsComponent } from './ui_components/visualizations/visualizations.component';
+import {
+  IMqttMessage,
+  MqttModule,
+  IMqttServiceOptions
+} from 'ngx-mqtt';
+
+
+const config: IMqttServiceOptions = {
+  connectOnCreate: true,
+  hostname: '134.197.75.31',
+  port: 30042,
+  path: '/mqtt'
+};
 
 @NgModule({
   declarations: [
@@ -51,7 +64,8 @@ import { VisualizationsComponent } from './ui_components/visualizations/visualiz
     BrowserAnimationsModule,
     NgxChartsModule,
     ColorPickerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MqttModule.forRoot(config)
   ],
   providers: [MqttSocketService],
   bootstrap: [AppComponent]

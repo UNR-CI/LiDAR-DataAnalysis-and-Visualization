@@ -30,13 +30,16 @@
     "bson": "4.4.0",
     "fzstd": "0.0.4",
     "mdb-angular-ui-kit": "^3.0.0",
+    "mqtt": "^4.3.7",
     "ngx-color-picker": "^11.0.0",
+    "ngx-mqtt": "^9.0.5",
     "ngx-socket-io": "^4.3.0",
     "pako": "^2.1.0",
     "rxjs": "~6.6.0",
     "stats-js": "^1.0.1",
     "three": "^0.129.0",
     "tslib": "^2.5.0",
+    "url": "^0.11.0",
     "zone.js": "^0.11.8"
   },
   "devDependencies": {
