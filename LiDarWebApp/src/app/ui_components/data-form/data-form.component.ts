@@ -48,6 +48,7 @@ export class DataFormComponent implements OnInit {
   submit(){
     console.log("Data Explorer Form Submitted");
     this.ds.selectedTopic = this.explorerForm.value.topic;
+    this.ms.subscribe(this.explorerForm.value.topic);
     this.router.navigateByUrl('/visualizations');
   }
 

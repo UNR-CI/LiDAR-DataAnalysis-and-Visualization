@@ -68,7 +68,7 @@
           <section class="button-group">
             <label class="radio-button"><b>Change Point Cloud Size:</b></label>
             <p style="padding-left: 10px; padding-right:  10px; padding-top: 10px;">0</p>
-           <mat-slider thumbLabel step="0.1" min="0" max="1" [(ngModel)]="selectedPointSize"></mat-slider>
+           <mat-slider thumbLabel step="0.1" min="0" max="1" ><input matSliderThumb #itemHeight [(ngModel)]="selectedPointSize"></mat-slider>
             <p style="padding-left: 10px; padding-top:  10px;">1</p>
           </section>
 

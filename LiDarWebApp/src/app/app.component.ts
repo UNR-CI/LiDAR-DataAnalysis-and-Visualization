@@ -24,9 +24,9 @@ export class PCD{
   topic:string;
 
   //Payload point cloud values
-  x:[];
-  y:[];
-  z:[];
-  intensity:[];
+  x:number[];
+  y:number[];
+  z:number[];
+  intensity:number[];
   objects:any;
 }

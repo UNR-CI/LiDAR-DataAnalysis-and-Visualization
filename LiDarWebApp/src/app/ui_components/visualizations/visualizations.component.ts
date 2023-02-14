@@ -8,6 +8,9 @@ import { DataService } from '@app/data.service';
 import { PCD } from '@app/app.component';
 import * as Pako from 'pako';
 import * as fzstd from 'fzstd';
+import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-visualizations',
@@ -120,14 +123,29 @@ export class VisualizationsComponent implements OnInit {
     // Updates graphs every two seconds
     this.updateInterval = setInterval(() => this.addRealTimeData(), 2000);
   }
-
-
+  
+  subscription : Subscription;
   ngOnInit()
   {
     //Scope variable to access point cloud class array
     var app = this;
-
+    //this.testObservable = new Observable(this.ms.testObserver);
+    //this.testObservable.subscribe(this.ms.testObserver);
+    this.subscription = this.ms.testSubject.subscribe({ next: (value) => {
+      app.pointCloud.push({time: value.time, topic: value.topic, x: value.x, 
+        y: value.y, z: value.z, intensity: value.intensity, 
+        objects: value.objects});
+      if (app.pointCloud.length > 2){
+        var val = app.pointCloud.shift();
+        //console.log(val);
+      }
+      app.ds.Data = app.pointCloud[0];
+      
+    }
+    });
+    //this.testObservable = new Observable<PCD>(this.ms.testObserver);
     this.ms.on('mqtt_message', function(value){
+        /*console.log('here');
         const compressed = new Uint8Array(value.payload);
         const uncompressedPayload = fzstd.decompress(compressed);
         var string = new TextDecoder().decode(uncompressedPayload);
@@ -143,8 +161,9 @@ export class VisualizationsComponent implements OnInit {
         app.pointCloud.push({time: value.time, topic: value.topic, x: this.parsedJSON.x, 
           y: this.parsedJSON.y, z: this.parsedJSON.z, intensity: this.parsedJSON.intensity, 
           objects: value.objects});
-        app.ds.Data = app.pointCloud[0];
+        app.ds.Data = app.pointCloud[0];*/
     });
+
   }
 
   // Allows for charts to be interactable
@@ -264,5 +283,9 @@ export class VisualizationsComponent implements OnInit {
 
     this.pastTime = this.ds.Data.time;
 
+  }
+  public ngOnDestroy() {
+    console.log('on destroy called');
+    this.subscription.unsubscribe();
   }
 }

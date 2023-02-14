@@ -39,10 +39,12 @@ export class RendererComponent implements AfterViewInit {
 
   @Input() color: string | number | Color = 0x000000;
   @Input() alpha = 0;
-  
+  onPage : boolean = false;
   // Main Function that implements on Init
   ngAfterViewInit()
   {
+    this.onPage = true;
+    console.log('init called');
     // Create Stats variable to run and show fps of app in upper left corner
     var stats = new STATS();
     var showStats = false; // Needs to be switched to true to make panel show in if statement below
@@ -91,12 +93,15 @@ export class RendererComponent implements AfterViewInit {
     // Reset Camera position after controls update
     this.pcamera.position.x = 0;
     this.pcamera.position.z = 30;
-
+    var self = this;
     // Function runs animate outside of Angular to not overload the app
     this.zone.runOutsideAngular( _ => 
     {
+      
       const animate = () =>
       {
+        if (self.onPage)
+        {
         this.renderer.clear();
         requestAnimationFrame( animate );
         stats.begin();
@@ -112,8 +117,9 @@ export class RendererComponent implements AfterViewInit {
         this.controls.update();
         this.render();
         stats.end();
-      };
-      animate();
+        } 
+      };    
+        animate();
     } )
   }
 
@@ -166,5 +172,15 @@ export class RendererComponent implements AfterViewInit {
   }
 
   // Call to render function which renders the main scene
-  render() { console.log('Render is being called'); this.renderer.render( this.pcdScene, this.pcamera ); }
+  render() { 
+    console.log('Render is being called', this.onPage); 
+      this.renderer.render( this.pcdScene, this.pcamera ); 
+  }
+
+  public ngOnDestroy() {
+    console.log('on destroy called');
+    this.onPage = false;
+
+    //this.ms.testSubject.unsubscribe();
+  }
 }

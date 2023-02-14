@@ -16,7 +16,7 @@ export class DataService {
   public colorValue : Number;
   public carColor: Number;
   public pedestrianColor: Number;
-  public pointSizeValue: Number;
+  public pointSizeValue: Number = 0.5;
 
   topicURL : string = 'http://ncar-im-1.rc.unr.edu:31750/topics';
   public selectedTopic : string = 'test15thVirginiaSE';
