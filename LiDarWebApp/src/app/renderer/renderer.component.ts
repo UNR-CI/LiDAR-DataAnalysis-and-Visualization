@@ -166,7 +166,7 @@ export class RendererComponent implements AfterViewInit {
 
     this.pcdPoints.geometry.attributes.position.needsUpdate = true;
     this.pcdPoints.geometry.attributes.color.needsUpdate = true;
-    this.pcdPoints.geometry.setDrawRange(0, vertX.length*3);
+    this.pcdPoints.geometry.setDrawRange(0, vertX.length);
     this.pcdPoints.geometry.computeBoundingSphere();
     console.log(this.ds.Data['x'].length);
   }
