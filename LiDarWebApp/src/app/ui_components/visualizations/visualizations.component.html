@@ -83,8 +83,10 @@
         <!--Visualization 3: Live data stream of 3D point cloud (using threejs render) -->
         <mat-card fxFlex="1 1 50%" style="position:relative">
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
-          <div class="align-chart-center">
-                <three-renderer color='#000000' [topic]="selectedTopic"></three-renderer>
+
+
+          <div class="align-chart-center" *ngFor="let topic of topicList;">
+                <three-renderer color='#000000' [topic]="topic"></three-renderer>
           </div>
         </mat-card>
         </div>
