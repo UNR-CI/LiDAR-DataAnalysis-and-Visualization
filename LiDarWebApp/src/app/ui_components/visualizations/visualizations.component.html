@@ -12,6 +12,13 @@
             Charts and Graphs 
           </h2>
 
+          <mat-select formControlName="topic" class="form-control">
+            <mat-option *ngFor="let location of topicList" [value]="location" (onSelectionChange)="change($event)">
+              {{location}}
+            </mat-option>
+          </mat-select>
+          
+          
           <div class="grid-container">
             <div class="item1" style="padding-top: 20px;">
                 <b>Current Sensor Location:</b> {{selectedLocation}}
@@ -77,7 +84,7 @@
         <mat-card fxFlex="1 1 50%" style="position:relative">
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
           <div class="align-chart-center">
-                <three-renderer color='#000000'></three-renderer>
+                <three-renderer color='#000000' [topic]="selectedTopic"></three-renderer>
           </div>
         </mat-card>
         </div>

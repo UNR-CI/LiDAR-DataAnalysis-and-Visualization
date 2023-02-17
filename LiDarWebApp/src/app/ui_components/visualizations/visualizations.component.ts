@@ -1,7 +1,7 @@
 /* Visualization Dashboard Component.
   Class to initialize bar chart and line graph and
   pass in near real time data from the data service. */
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DataService } from '@app/data.service';
@@ -10,6 +10,7 @@ import * as Pako from 'pako';
 import * as fzstd from 'fzstd';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
+import { topicList } from '@app/env';
 
 
 @Component({
@@ -123,10 +124,14 @@ export class VisualizationsComponent implements OnInit {
     // Updates graphs every two seconds
     this.updateInterval = setInterval(() => this.addRealTimeData(), 2000);
   }
-  
+  topicList : any = topicList;
   subscription : Subscription;
   ngOnInit()
   {
+    
+
+
+    console.log(topicList);
     //Scope variable to access point cloud class array
     var app = this;
     //this.testObservable = new Observable(this.ms.testObserver);
@@ -164,6 +169,17 @@ export class VisualizationsComponent implements OnInit {
         app.ds.Data = app.pointCloud[0];*/
     });
 
+  }
+
+  selectedTopic: String;
+
+  change(event) {
+    if(event.isUserInput) {
+      this.ds.selectedTopic = event.source.value;
+      this.ms.subscribe(event.source.value);
+      this.selectedTopic = event.source.value;
+      console.log(event.source.value, event.source.selected);
+    }
   }
 
   // Allows for charts to be interactable

@@ -22,6 +22,7 @@ import * as STATS from 'stats-js';
 
 // Main Class
 export class RendererComponent implements AfterViewInit {
+  @Input() topic: string;
   private pcdScene: Scene;
   private pcamera: PerspectiveCamera;
   private pcdPoints: Points;
@@ -108,6 +109,7 @@ export class RendererComponent implements AfterViewInit {
 
         // Checks that data is coming through and that the topic matches the selected topic
         if(this.ds.Data != null && this.ds.Data.topic == this.ds.selectedTopic) {
+          console.log(this.topic);
           console.log(this.ds.Data);
           console.log(this.ds.Data.topic + ' ' + this.ds.selectedTopic);
           console.log(this.ds.Data.topic);
@@ -182,5 +184,12 @@ export class RendererComponent implements AfterViewInit {
     this.onPage = false;
 
     //this.ms.testSubject.unsubscribe();
+  }
+
+  submit(){
+    console.log("Data Explorer Form Submitted");
+    //this.ds.selectedTopic = this.explorerForm.value.topic;
+    //this.ms.subscribe(this.explorerForm.value.topic);
+    //this.router.navigateByUrl('/visualizations');
   }
 }
