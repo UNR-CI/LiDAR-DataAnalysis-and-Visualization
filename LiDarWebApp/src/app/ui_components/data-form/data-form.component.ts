@@ -6,6 +6,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DataService } from '@app/data.service';
+import { topicList } from '@app/env';
 
 @Component({
   selector: 'app-data-form',
@@ -15,16 +16,7 @@ import { DataService } from '@app/data.service';
 export class DataFormComponent implements OnInit {
 
   // Default Values if no data is coming through from backend
-  topicList: any = ['/IM/15th/2/NW','/IM/15th/2/SE','/IM/9th/62/NE',
-  '/IM/9th/62/SW',
-  '/IM/4th/152/NE',
-  '/IM/4th/152/SW',
-  '/IM/Artemesia/42/SW',
-  '/IM/Artemesia/42/NE',
-  '/IM/5th/162/SW',
-  '/IM/College/22/SW',
-  '/IM/College/22/NE',
-  '/IM/6th/142/NE']
+  topicList: any = topicList;
   statList: any = ['Object Count']
   timeSelect: any = ['1','2','3','4','5','6','7','8','9','10']
   vizList: any = ['Line Graph', 'Bar Chart', '3D Point Cloud Render', 'All']
