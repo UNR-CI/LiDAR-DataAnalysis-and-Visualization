@@ -128,9 +128,8 @@ export class VisualizationsComponent implements OnInit {
   subscription : Subscription;
   ngOnInit()
   {
-    
-
-
+    this.topicList = topicList;
+    console.log(this.topicList)
     console.log(topicList);
     //Scope variable to access point cloud class array
     var app = this;
@@ -149,25 +148,6 @@ export class VisualizationsComponent implements OnInit {
     }
     });
     //this.testObservable = new Observable<PCD>(this.ms.testObserver);
-    this.ms.on('mqtt_message', function(value){
-        /*console.log('here');
-        const compressed = new Uint8Array(value.payload);
-        const uncompressedPayload = fzstd.decompress(compressed);
-        var string = new TextDecoder().decode(uncompressedPayload);
-        console.log(string);
-        this.parsedJSON = JSON.parse(string);
-
-        if (app.pointCloud.length > 2){
-          var val = app.pointCloud.shift();
-          console.log(val);
-        }
-
-        console.log(app.pointCloud.length);
-        app.pointCloud.push({time: value.time, topic: value.topic, x: this.parsedJSON.x, 
-          y: this.parsedJSON.y, z: this.parsedJSON.z, intensity: this.parsedJSON.intensity, 
-          objects: value.objects});
-        app.ds.Data = app.pointCloud[0];*/
-    });
 
   }
 
@@ -212,6 +192,7 @@ export class VisualizationsComponent implements OnInit {
 
   // Function to add data to both charts
   addRealTimeData() {
+    return;
     // Set Car and Pedestrian Counts
     this.carCount = 0;
     this.pedestrianCount = 0;

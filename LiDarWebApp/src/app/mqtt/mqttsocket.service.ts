@@ -15,7 +15,7 @@ import {
  } from 'ngx-mqtt';
 import { IClientSubscribeOptions } from 'mqtt-browser';
 import { PCD } from '@app/app.component';
-
+import { topicList } from '@app/env';
 
 const config: IMqttServiceOptions = {
   connectOnCreate: true,
@@ -30,44 +30,55 @@ const config: IMqttServiceOptions = {
 })
 
 //Class that connects to Flask App through websockets and emits MQTT messages
-export class MqttSocketService extends Socket {
+export class MqttSocketService {
  client:MqttService;
  dracoProcess:DracoService;
  subscription: Subscription;
+ subscriptions: Map<string, Subscription> = new Map<string, Subscription>();
  testSubject:Subject<PCD>;
+ subjects:Map<String,Subject<PCD>> = new Map<String,Subject<PCD>>();
+ subscribedState:Map<String,boolean>;
  dataList:PCD[] = [];
  constructor(private _mqttService: MqttService, private _draco:DracoService) {
   
-   super({url: 'http://ncar-im-1.rc.unr.edu:31750', options: {  withCredentials: false} 
+   //super({url: 'http://ncar-im-1.rc.unr.edu:31750', options: {  withCredentials: false} 
    //, transport : ['websocket']}
-   });
+   //});
    let self = this;
 
    this.testSubject = new Subject<PCD>();
    this.client = _mqttService;
    this.dracoProcess = _draco;   
    this.client.connect(config);
-   
+
+   for (var topic in topicList) {
+    //this.subjects[topic] = 
+    this.subjects[topicList[topic]] = new Subject<PCD>();
+    this.subscribe(topicList[topic]);
+    console.log(topic);
+   }
 
  }
 
- public dispatch(messageType: string, payload: any) {
-   this.emit(messageType, payload);
- }
+ //public dispatch(messageType: string, payload: any) {
+ //  this.emit(messageType, payload);
+ //}
 
- public subscribeToMessage(messageType: string): Observable<any> {
-   return this.fromEvent(messageType);
- }
+ //public subscribeToMessage(messageType: string): Observable<any> {
+ //  return this.fromEvent(messageType);
+ //}
  
  public subscribe(topic) {
-  if(this.subscription) {
-    this.subscription.unsubscribe();
+  if( topic in this.subscriptions.keys() && this.subscriptions[topic]) {
+    this.subscriptions[topic].unsubscribe();
   }
-  this.subscription = this.client.observe(topic).subscribe((message: IMqttMessage) => {
+  this.subscriptions[topic] = this.client.observe(topic).subscribe((message: IMqttMessage) => {
     //console.log('here yall');
     
     //self.dispatch('mqtt_message', '');
     //console.log(message.payload.toString());
+    console.log('test',message.payload);
+    if(!message.payload) return;
     var json = JSON.parse(message.payload.toString());
     //console.log(json);
     //console.log('time',json.time);
@@ -80,11 +91,14 @@ export class MqttSocketService extends Socket {
     pcd.topic = message.topic;
     pcd.time = json.timestamp;
     pcd.objects = json.objects;
-    this.testSubject.next(pcd);
+    this.subjects[topic].next(pcd);
    });
  };
 
  public ngOnDestroy() {
-  this.subscription.unsubscribe();
+  console.log("here destroy");
+  for (var topic in topicList) {
+    if(this.subscriptions[topic]) this.subscriptions[topic].unsubscribe();
+   }
   }
 }

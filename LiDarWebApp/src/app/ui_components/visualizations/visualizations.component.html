@@ -85,8 +85,8 @@
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
 
 
-          <div class="align-chart-center" *ngFor="let topic of topicList;">
-                <three-renderer color='#000000' [topic]="topic"></three-renderer>
+          <div class="align-chart-center" >
+                <three-renderer color='#000000' *ngFor="let topic of topicList;" [topic]="topic"></three-renderer>
           </div>
         </mat-card>
         </div>

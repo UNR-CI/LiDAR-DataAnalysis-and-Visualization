@@ -13,6 +13,11 @@ import { Color, WebGLRenderer, PerspectiveCamera, BoxGeometry, BufferGeometry, F
   PointsMaterial, MeshBasicMaterial, Mesh, Scene } from 'three';
 import { OrbitControls } from '@avatsaev/three-orbitcontrols-ts';
 import * as STATS from 'stats-js';
+import { Observable, Subscription } from 'rxjs';
+import { MqttService } from 'ngx-mqtt';
+import { PCD } from '@app/app.component';
+import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
+
 
 @Component
 ({
@@ -28,14 +33,31 @@ export class RendererComponent implements AfterViewInit {
   private pcdPoints: Points;
   public renderer: WebGLRenderer;
   public controls: OrbitControls;
-
+  subscription : Subscription;
+  ms : MqttSocketService;
   @ViewChild( 'canvas' ) canvasReference: ElementRef;
+  pointCloud : PCD;
   get canvas(): HTMLCanvasElement { return this.canvasReference.nativeElement; }
 
   // Constructor builds three scene and camera
-  constructor( private ds: DataService, readonly zone: NgZone ) {
+  constructor( private ds: DataService, readonly zone: NgZone, ms: MqttSocketService ) {
     this.pcdScene = new Scene();
     this.pcamera = new PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.ms = ms;
+
+  }
+
+  ngOnInit(): void {
+    console.log("Testing everything.");
+    console.log(this.topic);
+    //this.ms.subscribe(this.topic);
+    this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {
+      console.log("HERE NOW YALL");
+      this.pointCloud = {time: value.time, topic: value.topic, x: value.x, 
+        y: value.y, z: value.z, intensity: value.intensity, 
+        objects: value.objects};
+      }
+    });
   }
 
   @Input() color: string | number | Color = 0x000000;
@@ -108,13 +130,16 @@ export class RendererComponent implements AfterViewInit {
         stats.begin();
 
         // Checks that data is coming through and that the topic matches the selected topic
-        if(this.ds.Data != null && this.ds.Data.topic == this.ds.selectedTopic) {
-          console.log(this.topic);
-          console.log(this.ds.Data);
-          console.log(this.ds.Data.topic + ' ' + this.ds.selectedTopic);
-          console.log(this.ds.Data.topic);
-          this.updateBuffer();
-        }
+        //if(this.ds.Data != null && this.ds.Data.topic == this.ds.selectedTopic) {
+          //console.log(this.topic);
+          //console.log(this.ds.Data);
+          //console.log(this.ds.Data.topic + ' ' + this.ds.selectedTopic);
+          //console.log(this.ds.Data.topic);
+          console.log(this.pointCloud);
+          if(this.pointCloud) {
+            this.updateBuffer();
+          }
+        //}
 
         this.controls.update();
         this.render();
@@ -127,12 +152,13 @@ export class RendererComponent implements AfterViewInit {
 
   // Function that updates the position and color of the points
   updateBuffer() { 
+    console.log(this.topic);
     var vertices = [];
-    var vertX = this.ds.Data['x'];
-    var vertY = this.ds.Data['y'];
-    var vertZ = this.ds.Data['z'];
-    var boundBox = this.ds.Data['objects'];
-    var intensity = this.ds.Data['intensity'];
+    var vertX = this.pointCloud['x'];
+    var vertY = this.pointCloud['y'];
+    var vertZ = this.pointCloud['z'];
+    var boundBox = this.pointCloud['objects'];
+    var intensity = this.pointCloud['intensity'];
     const colorPicked = new Color(this.ds.colorValue); // Color for entire scene
     const carColorP = new Color(this.ds.carColor); // Color for Cars
     const pedColorP = new Color(this.ds.pedestrianColor); // Color for Pedestrians
@@ -149,9 +175,9 @@ export class RendererComponent implements AfterViewInit {
           && boundBox[j]['miny'] < vertY[i] && boundBox[j]['maxy'] > vertY[i] 
           && boundBox[j]['minz'] < vertZ[i] && boundBox[j]['maxz'] > vertZ[i]) {
 
-          let xsize = this.ds.Data.objects[j].maxx - this.ds.Data.objects[j].minx;
-          let ysize = this.ds.Data.objects[j].maxy - this.ds.Data.objects[j].miny;
-          let zsize = this.ds.Data.objects[j].maxz - this.ds.Data.objects[j].minz;
+          let xsize = this.pointCloud.objects[j].maxx - this.pointCloud.objects[j].minx;
+          let ysize = this.pointCloud.objects[j].maxy - this.pointCloud.objects[j].miny;
+          let zsize = this.pointCloud.objects[j].maxz - this.pointCloud.objects[j].minz;
 
           let volume = xsize * ysize * zsize;
 
@@ -170,7 +196,7 @@ export class RendererComponent implements AfterViewInit {
     this.pcdPoints.geometry.attributes.color.needsUpdate = true;
     this.pcdPoints.geometry.setDrawRange(0, vertX.length);
     this.pcdPoints.geometry.computeBoundingSphere();
-    console.log(this.ds.Data['x'].length);
+    console.log(this.pointCloud['x'].length);
   }
 
   // Call to render function which renders the main scene
@@ -182,6 +208,7 @@ export class RendererComponent implements AfterViewInit {
   public ngOnDestroy() {
     console.log('on destroy called');
     this.onPage = false;
+    this.subscription.unsubscribe();
 
     //this.ms.testSubject.unsubscribe();
   }
