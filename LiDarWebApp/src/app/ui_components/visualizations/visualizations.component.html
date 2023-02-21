@@ -11,66 +11,8 @@
           <h2 class="text-secondary" style="padding: 10px; margin-bottom: 0;">
             Charts and Graphs 
           </h2>
-          
-          <div class="grid-container">
-            <div class="item1" style="padding-top: 20px;">
-                <b>Current Sensor Location:</b> {{selectedLocation}}
-            </div>
-            <div class="item2"></div>
-            <div class="item3" *ngIf="objectCount == 0" style="align-items: right;">
-                <mat-spinner value="50" diameter="25" style="margin:0 auto; z-index: 100;"></mat-spinner>
-                <p>Loading...No objects detected.</p>
-            </div>
-          </div>
 
     <div #flexLayoutContainer  style="position: relative; padding-left: 200px; padding-right: 200px;">
-
-        <div fxLayout="row" fxLayout.lt-sm="column" fxFlexAlign="baseline" [fxLayoutGap]="layoutGap">
-            <!--Visualization 1: Current Count of Object (Bar Chart) -->
-            <mat-card fxFlex="1 1 50%" class="align-header-center">
-              <h3><b>Current Number of Objects (Vehicles and Pedestrians)</b></h3>
-              <div class="align-chart-left">
-                <ngx-charts-bar-vertical
-                [scheme]="barColorScheme"
-                [results]="barData"
-                [gradient]="gradient"
-                [xAxis]="showXAxis"
-                [yAxis]="showYAxis"
-                [legend]="showLegend"
-                [showXAxisLabel]="showXAxisLabel"
-                [showYAxisLabel]="showYAxisLabel"
-                [xAxisLabel]="xAxisBar"
-                [yAxisLabel]="yAxisBar"
-                (select)="onSelect($event)">
-                </ngx-charts-bar-vertical>
-                <div *ngIf="objectCount == 0" >No Data Found.</div>
-              </div>
-            </mat-card>
-            
-            <!--Visualization 2: Current Count of Total Objects (Line Graph) -->
-            <mat-card fxFlex="1 1 50%" class="align-header-center">
-              <h3><b>Count of Total Objects Detected (per Second)</b></h3>
-              <div class="align-chart-right">
-                <ngx-charts-line-chart
-                [scheme]="lineColorScheme"
-                [results]="lineData"
-                [gradient]="gradient"
-                [xAxis]="showXAxis"
-                [yAxis]="showYAxis"
-                [legend]="showLegend"
-                [showXAxisLabel]="showXAxisLabel"
-                [showYAxisLabel]="showYAxisLabel"
-                [xAxisLabel]="xAxisLine"
-                [yAxisLabel]="yAxisLine"
-                [autoScale]="true"
-                [animations]="false"
-                (select)="onSelect($event)">
-                </ngx-charts-line-chart>
-                <div *ngIf="objectCount == 0">No Data.</div>
-              </div>
-              <div style="padding-top: 350px;">Live Count: {{objectCount}}</div>
-            </mat-card>
-        </div>
 
         <div fxLayout="column" [fxLayoutGap]="layoutGap" style="padding-top: 25px; padding-bottom: 25px;">
         <!--Visualization 3: Live data stream of 3D point cloud (using threejs render) -->
@@ -84,6 +26,7 @@
               <mat-button-toggle value="off">Off</mat-button-toggle>
             </mat-button-toggle-group>
             {{topic}}
+            <app-charts [topic]="topic" [hidden]="group.value == 'off'"></app-charts>
             <three-renderer color='#000000'  [active]="group.value" [topic]="topic" [hidden]="group.value == 'off'"></three-renderer>
           </div>
         </mat-card>

@@ -26,6 +26,7 @@ import { AboutComponent } from './ui_components/about/about.component';
 import { DataFormComponent } from './ui_components/data-form/data-form.component';
 import { SettingsComponent } from './ui_components/settings/settings.component';
 import { VisualizationsComponent } from './ui_components/visualizations/visualizations.component';
+import { ChartsComponent } from './ui_components/charts/charts.component';
 import {
   IMqttMessage,
   MqttModule,
@@ -50,7 +51,8 @@ const config: IMqttServiceOptions = {
     AboutComponent,
     DataFormComponent,
     SettingsComponent,
-    VisualizationsComponent
+    VisualizationsComponent,
+    ChartsComponent
   ],
   imports: [
     BrowserModule,

@@ -145,6 +145,7 @@ export class RendererComponent implements AfterViewInit {
         } else {
           self.ms.unsubscribe(self.topic);
         } 
+        if(this.onPage)
         requestAnimationFrame( animate );
       };    
         animate();

@@ -1,0 +1,49 @@
+<!--------------- Data Visualization Dashboard Page ------------------------->
+<!----- Displays visualizations through ngx-charts and three js scene ------->
+<div fxLayout="row" fxLayout.lt-sm="column" fxFlexAlign="baseline" [fxLayoutGap]="layoutGap">
+    <!--Visualization 1: Current Count of Object (Bar Chart) -->
+    <mat-card fxFlex="1 1 50%" class="align-header-center">
+        <h3><b>Current Number of Objects (Vehicles and Pedestrians)</b></h3>
+        <div class="align-chart-left">
+        <ngx-charts-bar-vertical
+        [scheme]="barColorScheme"
+        [results]="barData"
+        [gradient]="gradient"
+        [xAxis]="showXAxis"
+        [yAxis]="showYAxis"
+        [legend]="showLegend"
+        [showXAxisLabel]="showXAxisLabel"
+        [showYAxisLabel]="showYAxisLabel"
+        [xAxisLabel]="xAxisBar"
+        [yAxisLabel]="yAxisBar"
+        (select)="onSelect($event)">
+        </ngx-charts-bar-vertical>
+        <div *ngIf="objectCount == 0" >No Data Found.</div>
+        </div>
+    </mat-card>
+    
+    <!--Visualization 2: Current Count of Total Objects (Line Graph) -->
+    <mat-card fxFlex="1 1 50%" class="align-header-center">
+        <h3><b>Count of Total Objects Detected (per Second)</b></h3>
+        <div class="align-chart-right">
+        <ngx-charts-line-chart
+        [scheme]="lineColorScheme"
+        [results]="lineData"
+        [gradient]="gradient"
+        [xAxis]="showXAxis"
+        [yAxis]="showYAxis"
+        [legend]="showLegend"
+        [showXAxisLabel]="showXAxisLabel"
+        [showYAxisLabel]="showYAxisLabel"
+        [xAxisLabel]="xAxisLine"
+        [yAxisLabel]="yAxisLine"
+        [autoScale]="true"
+        [animations]="false"
+        (select)="onSelect($event)">
+        </ngx-charts-line-chart>
+        <div *ngIf="objectCount == 0">No Data.</div>
+        </div>
+        <div style="padding-top: 350px;">Live Count: {{objectCount}}</div>
+    </mat-card>
+</div>
+
