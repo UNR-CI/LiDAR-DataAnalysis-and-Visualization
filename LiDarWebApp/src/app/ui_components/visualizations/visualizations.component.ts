@@ -138,7 +138,7 @@ export class VisualizationsComponent implements OnInit {
     this.subscription = this.ms.testSubject.subscribe({ next: (value) => {
       app.pointCloud.push({time: value.time, topic: value.topic, x: value.x, 
         y: value.y, z: value.z, intensity: value.intensity, 
-        objects: value.objects});
+        objects: value.objects, payload: null});
       if (app.pointCloud.length > 2){
         var val = app.pointCloud.shift();
         //console.log(val);

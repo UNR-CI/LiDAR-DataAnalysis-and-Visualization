@@ -28,5 +28,6 @@ export class PCD{
   y:number[];
   z:number[];
   intensity:number[];
+  payload?:Uint8Array=null;
   objects:any;
 }

@@ -55,8 +55,8 @@ export class DracoService {
       });
   }
   
-  converData(bytes : Uint8Array) : PCD {
-    let data : PCD;
+  convertData(bytes : Uint8Array) : any {
+    let data : object;
     let x = [];
     let y = [];
     let z = [];
@@ -72,15 +72,8 @@ export class DracoService {
         let dracoGeometry = new this.decoderModule.PointCloud();
         let decodingStatus = this.decoder.DecodeArrayToPointCloud(bytes, bytes.length, dracoGeometry);
         if(decodingStatus.ok()) {
-          /*console.log(dracoGeometry);
-          console.log(dracoGeometry.num_points());
-          console.log(dracoGeometry.num_attributes());
-          console.log(this.decoder.GetAttributeId(dracoGeometry,this.decoderModule.GENERIC,0));
-          console.log('---------------------');*/
           for (var i = 0; i < dracoGeometry.num_attributes(); i++ ) {
             let attr = this.decoder.GetAttribute(dracoGeometry, i);
-            /*console.log(attr.attribute_type());
-            console.log(attr.data_type());*/
             switch(attr.data_type()) {
               case DracoDataType.DT_FLOAT32:
                 var numPoints = dracoGeometry.num_points() * attr.num_components();
@@ -100,8 +93,6 @@ export class DracoService {
                         z.push(element);
                     }
                 });
-                //console.log(array);
-  
               break;
               case DracoDataType.DT_UINT8:
                 var numPoints = dracoGeometry.num_points() * attr.num_components();
@@ -113,7 +104,6 @@ export class DracoService {
                         intensity.push(element);
                 });
                 this.decoderModule._free(ptr);
-                //console.log(array2);
               break;
               case DracoDataType.DT_UINT16:
                 var numPoints = dracoGeometry.num_points() * attr.num_components();
@@ -122,16 +112,13 @@ export class DracoService {
                 this.decoder.GetAttributeDataArrayForAllPoints(dracoGeometry, attr, this.decoderModule.DT_UINT16, dataSize, ptr);
                 var array3 = new Uint16Array( this.decoderModule.HEAPF32.buffer, ptr, numPoints ).slice();
                 this.decoderModule._free(ptr);
-                //console.log(array3);
               break;
             }
-            //console.log(attr.num_components());
-            //console.log('aaaaaaaaaaa');
           }
           this.decoderModule.destroy(dracoGeometry);
         }
     }
-    data = {x:x,y:y,z:z,intensity:intensity,time:'',topic:'',objects:[]};
+    data = {x:x,y:y,z:z,intensity:intensity};
     return data;
   }
 }

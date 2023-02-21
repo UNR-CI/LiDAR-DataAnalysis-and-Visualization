@@ -11,13 +11,6 @@
           <h2 class="text-secondary" style="padding: 10px; margin-bottom: 0;">
             Charts and Graphs 
           </h2>
-
-          <mat-select formControlName="topic" class="form-control">
-            <mat-option *ngFor="let location of topicList" [value]="location" (onSelectionChange)="change($event)">
-              {{location}}
-            </mat-option>
-          </mat-select>
-          
           
           <div class="grid-container">
             <div class="item1" style="padding-top: 20px;">
@@ -85,8 +78,13 @@
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
 
 
-          <div class="align-chart-center" >
-                <three-renderer color='#000000' *ngFor="let topic of topicList;" [topic]="topic"></three-renderer>
+          <div class="align-chart-center" *ngFor="let topic of topicList;" >
+            <mat-button-toggle-group name="enable" #group="matButtonToggleGroup" value="off">
+              <mat-button-toggle value="on">On</mat-button-toggle>
+              <mat-button-toggle value="off">Off</mat-button-toggle>
+            </mat-button-toggle-group>
+            {{topic}}
+            <three-renderer color='#000000'  [active]="group.value" [topic]="topic" [hidden]="group.value == 'off'"></three-renderer>
           </div>
         </mat-card>
         </div>

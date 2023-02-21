@@ -9,4 +9,4 @@ export const topicList: any = ['/IM/15th/2/NW','/IM/15th/2/SE','/IM/9th/62/NE',
 '/IM/5th/162/SW',
 '/IM/College/22/SW',
 '/IM/College/22/NE',
-'/IM/6th/142/NE']
+'/IM/6th/142/NE'];

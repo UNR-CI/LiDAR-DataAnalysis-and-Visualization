@@ -5,7 +5,6 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subscription, Observer,of, Subject} from 'rxjs';
-import { DracoService } from '@app/draco/draco.service';
 
 import {
   IMqttMessage,
@@ -25,78 +24,72 @@ const config: IMqttServiceOptions = {
   protocol: 'wss'
 };
 
+export interface SubscriptionInterface {
+  [index: string]: Subscription;
+}
+
+export interface SubjectInterface {
+  [index: string]: Subject<PCD>;
+}
+
 @Injectable({
  providedIn: 'root'
 })
 
+
 //Class that connects to Flask App through websockets and emits MQTT messages
 export class MqttSocketService {
  client:MqttService;
- dracoProcess:DracoService;
  subscription: Subscription;
- subscriptions: Map<string, Subscription> = new Map<string, Subscription>();
- testSubject:Subject<PCD>;
- subjects:Map<String,Subject<PCD>> = new Map<String,Subject<PCD>>();
- subscribedState:Map<String,boolean>;
- dataList:PCD[] = [];
- constructor(private _mqttService: MqttService, private _draco:DracoService) {
-  
-   //super({url: 'http://ncar-im-1.rc.unr.edu:31750', options: {  withCredentials: false} 
-   //, transport : ['websocket']}
-   //});
-   let self = this;
 
+ subscriptions: SubscriptionInterface = {};
+ testSubject: Subject<PCD>;
+ subjects: SubjectInterface = {};
+ subscribedState: Record<string,boolean>;
+ dataList:PCD[] = [];
+ constructor(private _mqttService: MqttService) {
+   let self = this;
    this.testSubject = new Subject<PCD>();
    this.client = _mqttService;
-   this.dracoProcess = _draco;   
    this.client.connect(config);
-
    for (var topic in topicList) {
-    //this.subjects[topic] = 
     this.subjects[topicList[topic]] = new Subject<PCD>();
-    this.subscribe(topicList[topic]);
-    console.log(topic);
    }
 
  }
-
- //public dispatch(messageType: string, payload: any) {
- //  this.emit(messageType, payload);
- //}
-
- //public subscribeToMessage(messageType: string): Observable<any> {
- //  return this.fromEvent(messageType);
- //}
  
  public subscribe(topic) {
-  if( topic in this.subscriptions.keys() && this.subscriptions[topic]) {
+
+  if( topic in this.subscriptions && this.subscriptions[topic]) {
     this.subscriptions[topic].unsubscribe();
   }
   this.subscriptions[topic] = this.client.observe(topic).subscribe((message: IMqttMessage) => {
-    //console.log('here yall');
-    
-    //self.dispatch('mqtt_message', '');
-    //console.log(message.payload.toString());
-    console.log('test',message.payload);
     if(!message.payload) return;
     var json = JSON.parse(message.payload.toString());
-    //console.log(json);
-    //console.log('time',json.time);
-    //console.log("here now yall");
-    //let file = Base64Binary.decode(json.file);
     let file = Uint8Array.from(window.atob(json.file), (v) => v.charCodeAt(0));
-    //self.dataList.push(this.dracoProcess.converData(file));
-    var pcd = this.dracoProcess.converData(file);
-    //console.log(pcd);
+    var pcd = new PCD;
     pcd.topic = message.topic;
     pcd.time = json.timestamp;
     pcd.objects = json.objects;
+    pcd.payload = file;
     this.subjects[topic].next(pcd);
    });
  };
 
+ public isSubscribed(topic) : boolean { 
+  return this.subscriptions[topic] != null && !this.subscriptions[topic].closed; //this.subscriptions.has(topic) && !this.subscriptions[topic].closed;
+ }
+
+ public unsubscribe(topic) {
+  if (topic in this.subscriptions) {
+    this.subscriptions[topic].unsubscribe();
+    delete this.subscriptions[topic];
+  }
+ }
+
  public ngOnDestroy() {
   console.log("here destroy");
+  
   for (var topic in topicList) {
     if(this.subscriptions[topic]) this.subscriptions[topic].unsubscribe();
    }

@@ -17,7 +17,7 @@ import { Observable, Subscription } from 'rxjs';
 import { MqttService } from 'ngx-mqtt';
 import { PCD } from '@app/app.component';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
-
+import { DracoService } from '@app/draco/draco.service';
 
 @Component
 ({
@@ -28,36 +28,40 @@ import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 // Main Class
 export class RendererComponent implements AfterViewInit {
   @Input() topic: string;
+  @Input() active: string;
   private pcdScene: Scene;
   private pcamera: PerspectiveCamera;
   private pcdPoints: Points;
   public renderer: WebGLRenderer;
   public controls: OrbitControls;
   subscription : Subscription;
+  dracoProcess:DracoService;
   ms : MqttSocketService;
   @ViewChild( 'canvas' ) canvasReference: ElementRef;
   pointCloud : PCD;
   get canvas(): HTMLCanvasElement { return this.canvasReference.nativeElement; }
 
   // Constructor builds three scene and camera
-  constructor( private ds: DataService, readonly zone: NgZone, ms: MqttSocketService ) {
+  constructor( private ds: DataService, readonly zone: NgZone, ms: MqttSocketService, private _draco:DracoService ) {
     this.pcdScene = new Scene();
     this.pcamera = new PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.ms = ms;
+    this.dracoProcess = _draco;
+    console.log('inited!');
 
   }
 
   ngOnInit(): void {
-    console.log("Testing everything.");
-    console.log(this.topic);
     //this.ms.subscribe(this.topic);
-    this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {
-      console.log("HERE NOW YALL");
-      this.pointCloud = {time: value.time, topic: value.topic, x: value.x, 
-        y: value.y, z: value.z, intensity: value.intensity, 
-        objects: value.objects};
-      }
+    var self = this;
+    this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {self.process(value)}
     });
+  }
+  process(value): void {
+    var data = this.dracoProcess.convertData(value.payload);
+    this.pointCloud = {time: value.time, topic: value.topic, x: data.x, 
+      y: data.y, z: data.z, intensity: data.intensity, 
+      objects: value.objects, payload: null};
   }
 
   @Input() color: string | number | Color = 0x000000;
@@ -87,8 +91,8 @@ export class RendererComponent implements AfterViewInit {
       colors[index] = 0;
     }
     
-    if ( positions.length > 0 ) geometry.addAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
-    if ( colors.length > 0 ) geometry.addAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
+    if ( positions.length > 0 ) geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
+    if ( colors.length > 0 ) geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
 
     // Set three material, points, scene and camera elements to default values
     var material = new PointsMaterial( { size: this.ds.pointSizeValue, color: 0xffffff, vertexColors: true });
@@ -120,31 +124,28 @@ export class RendererComponent implements AfterViewInit {
     // Function runs animate outside of Angular to not overload the app
     this.zone.runOutsideAngular( _ => 
     {
-      
       const animate = () =>
       {
-        if (self.onPage)
-        {
-        this.renderer.clear();
-        requestAnimationFrame( animate );
-        stats.begin();
+        
+        if (self.onPage && self.active != 'off') {
+          if(!self.ms.isSubscribed(self.topic)) {
+            self.ms.subscribe(self.topic);
+          } 
+          this.renderer.clear();
+          
+          stats.begin();
 
-        // Checks that data is coming through and that the topic matches the selected topic
-        //if(this.ds.Data != null && this.ds.Data.topic == this.ds.selectedTopic) {
-          //console.log(this.topic);
-          //console.log(this.ds.Data);
-          //console.log(this.ds.Data.topic + ' ' + this.ds.selectedTopic);
-          //console.log(this.ds.Data.topic);
-          console.log(this.pointCloud);
           if(this.pointCloud) {
             this.updateBuffer();
           }
-        //}
 
-        this.controls.update();
-        this.render();
-        stats.end();
+          this.controls.update();
+          this.render();
+          stats.end();
+        } else {
+          self.ms.unsubscribe(self.topic);
         } 
+        requestAnimationFrame( animate );
       };    
         animate();
     } )
@@ -152,7 +153,6 @@ export class RendererComponent implements AfterViewInit {
 
   // Function that updates the position and color of the points
   updateBuffer() { 
-    console.log(this.topic);
     var vertices = [];
     var vertX = this.pointCloud['x'];
     var vertY = this.pointCloud['y'];
@@ -196,12 +196,10 @@ export class RendererComponent implements AfterViewInit {
     this.pcdPoints.geometry.attributes.color.needsUpdate = true;
     this.pcdPoints.geometry.setDrawRange(0, vertX.length);
     this.pcdPoints.geometry.computeBoundingSphere();
-    console.log(this.pointCloud['x'].length);
   }
 
   // Call to render function which renders the main scene
   render() { 
-    console.log('Render is being called', this.onPage); 
       this.renderer.render( this.pcdScene, this.pcamera ); 
   }
 
@@ -209,7 +207,6 @@ export class RendererComponent implements AfterViewInit {
     console.log('on destroy called');
     this.onPage = false;
     this.subscription.unsubscribe();
-
     //this.ms.testSubject.unsubscribe();
   }
 
