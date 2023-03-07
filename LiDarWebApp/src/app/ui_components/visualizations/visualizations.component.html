@@ -27,7 +27,9 @@
             </mat-button-toggle-group>
             {{topic}}
             <app-charts [topic]="topic" [hidden]="group.value == 'off'"></app-charts>
+            <div *ngIf="group.value == 'on'">
             <three-renderer color='#000000'  [active]="group.value" [topic]="topic" [hidden]="group.value == 'off'"></three-renderer>
+            </div>
           </div>
         </mat-card>
         </div>

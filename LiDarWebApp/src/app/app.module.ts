@@ -14,8 +14,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { CommonModule } from '@angular/common';
 /* Created Components including UI and Renderer */
+
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './ui_components/header/header.component';
 import { FooterComponent } from './ui_components/footer/footer.component';
@@ -56,6 +57,7 @@ const config: IMqttServiceOptions = {
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     HttpClientModule,
     FlexLayoutModule,

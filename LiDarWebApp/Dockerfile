@@ -1,5 +1,5 @@
 # Nodejs Base image
-FROM node:12.22.9 as build-stage
+FROM node:lts as build-stage
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
@@ -16,7 +16,7 @@ RUN npm install
 COPY . /app
 
 # Run build command
-RUN ng build --prod
+RUN ng build --configuration production #ng build --prod
 
 
 FROM nginx:latest
