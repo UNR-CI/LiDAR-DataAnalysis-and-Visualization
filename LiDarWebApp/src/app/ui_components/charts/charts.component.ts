@@ -11,7 +11,7 @@
   import { Observable } from 'rxjs';
   import { Subscription } from 'rxjs';
   import { topicList } from '@app/env';
-  
+  import { SimpleChanges } from '@angular/core';
   
   @Component({
     selector: 'app-charts',
@@ -129,6 +129,7 @@
 
     ngOnInit()
     {
+      console.log("here");
       this.topicList = topicList;
 
       //Scope variable to access point cloud class array
@@ -152,6 +153,23 @@
         this.selectedTopic = event.source.value;
         console.log(event.source.value, event.source.selected);
       }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+      var self = this;
+      this.counter = 0;
+      console.log(changes.topic.currentValue);  
+      this.lineData[0].series = this.initLineChart();
+      if(this.subscription)
+      {
+        this.subscription.unsubscribe();
+      }
+      this.ms.subscribe(changes.topic.currentValue);
+      this.ms.unsubscribe(changes.topic.previousValue);
+      this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {
+          self.pointCloud = value;
+        }
+      });
     }
   
     // Allows for charts to be interactable

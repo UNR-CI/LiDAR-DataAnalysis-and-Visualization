@@ -18,7 +18,7 @@ import { MqttService } from 'ngx-mqtt';
 import { PCD } from '@app/app.component';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DracoService } from '@app/draco/draco.service';
-
+import { SimpleChanges } from '@angular/core';
 @Component
 ({
   selector: 'three-renderer',
@@ -203,6 +203,19 @@ export class RendererComponent implements AfterViewInit {
   render() { 
       this.renderer.render( this.pcdScene, this.pcamera ); 
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    var self = this;
+    console.log(changes.topic.currentValue);  
+    if(this.subscription)
+    {
+      this.subscription.unsubscribe();
+    }
+    this.ms.subscribe(changes.topic.currentValue);
+    this.ms.unsubscribe(changes.topic.previousValue);
+    this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {self.process(value)}});
+  }
+
 
   public ngOnDestroy() {
     console.log('on destroy called');

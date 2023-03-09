@@ -53,15 +53,18 @@ export class MqttSocketService {
    this.client = _mqttService;
    this.client.connect(config);
    for (var topic in topicList) {
-    this.subjects[topicList[topic]] = new Subject<PCD>();
+    this.subjects[topicList[topic].topic] = new Subject<PCD>();
    }
 
  }
  
  public subscribe(topic) {
-
+  if(topic == "") {
+    return;
+  }
   if( topic in this.subscriptions && this.subscriptions[topic]) {
     this.subscriptions[topic].unsubscribe();
+    this.subscriptions[topic] = null;
   }
   this.subscriptions[topic] = this.client.observe(topic).subscribe((message: IMqttMessage) => {
     if(!message.payload) return;
@@ -73,6 +76,7 @@ export class MqttSocketService {
     pcd.objects = json.objects;
     pcd.payload = file;
     this.subjects[topic].next(pcd);
+    //console.log('acquire');
    });
  };
 
@@ -91,7 +95,7 @@ export class MqttSocketService {
   console.log("here destroy");
   
   for (var topic in topicList) {
-    if(this.subscriptions[topic]) this.subscriptions[topic].unsubscribe();
+    if(this.subscriptions[topicList[topic].topic]) this.subscriptions[topic].unsubscribe();
    }
   }
 }

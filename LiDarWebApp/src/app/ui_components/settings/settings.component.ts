@@ -15,7 +15,7 @@ export class SettingsComponent implements OnInit {
   selectedColor: string;
   selectedCarColor: string;
   selectedPedColor: string;
-  selectedPointSize: Number = .5;
+  selectedPointSize: Number = .2;
 
   // Init default variables
   colors: string[] = ['Red (Default)', 'Green', 'Blue'];

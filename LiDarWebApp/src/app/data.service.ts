@@ -16,7 +16,7 @@ export class DataService {
   public colorValue : Number;
   public carColor: Number;
   public pedestrianColor: Number;
-  public pointSizeValue: Number = 0.5;
+  public pointSizeValue: Number = 0.2;
 
   topicURL : string = 'http://ncar-im-1.rc.unr.edu:31750/topics';
   public selectedTopic : string = 'test15thVirginiaSE';
@@ -26,7 +26,7 @@ export class DataService {
     this.colorValue = 0xFF0000;
     this.carColor = 0xFF0000;
     this.pedestrianColor = 0xFF0000;
-    this.pointSizeValue = 0.5;
+    this.pointSizeValue = 0.2;
   }
 
   // Function to return initial topic from the backend

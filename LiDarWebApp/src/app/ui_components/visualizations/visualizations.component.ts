@@ -162,6 +162,7 @@ export class VisualizationsComponent implements OnInit {
     }
   }
 
+
   // Allows for charts to be interactable
   onSelect(event) {
     console.log(event);

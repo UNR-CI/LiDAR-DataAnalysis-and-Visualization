@@ -7,30 +7,40 @@
         <h1>Data Visualization Dashboard</h1>
       </div>
 
+      <mat-form-field>
+        <mat-select placeholder="Select Location" [(value)]="selectedTopic">
+          <mat-option *ngFor="let topicStruct of topicList" [value]="topicStruct.topic">
+            {{ topicStruct.viewTopic }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <div style="text-align:center">
           <h2 class="text-secondary" style="padding: 10px; margin-bottom: 0;">
             Charts and Graphs 
           </h2>
-
+          
     <div #flexLayoutContainer  style="position: relative; padding-left: 200px; padding-right: 200px;">
-
+        <app-charts [topic]="selectedTopic" ></app-charts>
         <div fxLayout="column" [fxLayoutGap]="layoutGap" style="padding-top: 25px; padding-bottom: 25px;">
         <!--Visualization 3: Live data stream of 3D point cloud (using threejs render) -->
         <mat-card fxFlex="1 1 50%" style="position:relative">
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
-
-
-          <div class="align-chart-center" *ngFor="let topic of topicList;" >
+          <div class="align-chart-center">
+            <three-renderer color='#000000' [topic]="selectedTopic"></three-renderer>
+          </div>
+          <!--<div class="align-chart-center" *ngFor="let topicitem of topicList;" >
             <mat-button-toggle-group name="enable" #group="matButtonToggleGroup" value="off">
               <mat-button-toggle value="on">On</mat-button-toggle>
               <mat-button-toggle value="off">Off</mat-button-toggle>
             </mat-button-toggle-group>
-            {{topic}}
-            <app-charts [topic]="topic" [hidden]="group.value == 'off'"></app-charts>
+            {{topicitem.viewTopic}}
+            
             <div *ngIf="group.value == 'on'">
-            <three-renderer color='#000000'  [active]="group.value" [topic]="topic" [hidden]="group.value == 'off'"></three-renderer>
+              <app-charts [topic]="topicitem.topic" [hidden]="group.value == 'off'"></app-charts>
+              <three-renderer color='#000000'  [active]="group.value" [topic]="topicitem.topic" [hidden]="group.value == 'off'"></three-renderer>
             </div>
-          </div>
+          </div>-->
         </mat-card>
         </div>
 
