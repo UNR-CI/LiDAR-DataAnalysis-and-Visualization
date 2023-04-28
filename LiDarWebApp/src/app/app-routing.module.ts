@@ -6,6 +6,7 @@ import { DataFormComponent } from './ui_components/data-form/data-form.component
 import { VisualizationsComponent } from './ui_components/visualizations/visualizations.component';
 import { SettingsComponent } from './ui_components/settings/settings.component';
 import { AboutComponent } from './ui_components/about/about.component';
+import { CesiumViewerComponent } from './ui_components/cesium/cesium-viewer.component';
 
 // Declare routes to each page in the application
 const routes: Routes = [
@@ -29,6 +30,10 @@ const routes: Routes = [
   {
     path: 'about',
     component: AboutComponent
+  },
+  {
+    path: 'cesium',
+    component: CesiumViewerComponent
   }
 ];
 

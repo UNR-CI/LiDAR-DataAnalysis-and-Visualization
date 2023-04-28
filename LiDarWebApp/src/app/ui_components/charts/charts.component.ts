@@ -136,10 +136,11 @@
       var app = this;
       //this.testObservable = new Observable(this.ms.testObserver);
       //this.testObservable.subscribe(this.ms.testObserver);
-      this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {
-        app.pointCloud = value;
+      if (this.ms && this.topic in this.ms.subjects) {
+        this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {
+          app.pointCloud = value;
+        }});
       }
-      });
       //this.testObservable = new Observable<PCD>(this.ms.testObserver);
   
     }
@@ -164,12 +165,14 @@
       {
         this.subscription.unsubscribe();
       }
-      this.ms.subscribe(changes.topic.currentValue);
-      this.ms.unsubscribe(changes.topic.previousValue);
-      this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {
+      if(this.ms && changes.topic.currentValue in this.ms.subjects) {
+        this.ms.subscribe(changes.topic.currentValue);
+        this.ms.unsubscribe(changes.topic.previousValue);
+      
+        this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {
           self.pointCloud = value;
-        }
-      });
+          }});
+      }
     }
   
     // Allows for charts to be interactable

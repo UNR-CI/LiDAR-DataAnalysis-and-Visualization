@@ -5,7 +5,10 @@
     "baseUrl": "./src",
     "paths": {
       "@app/*":["app/*"],
-      "fs": ["./node_modules/fs-web"]
+      "fs": ["./node_modules/fs-web"],
+      "http": ["./node_modules/stream-http"],
+      "https": ["./node_modules/https-browserify"],
+      "zlib": ["./node_modules/browserify-zlib"]
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,

@@ -54,8 +54,10 @@ export class RendererComponent implements AfterViewInit {
   ngOnInit(): void {
     //this.ms.subscribe(this.topic);
     var self = this;
-    this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {self.process(value)}
-    });
+    if(this.ms && this.topic in this.ms.subjects)
+    {
+      this.subscription = this.ms.subjects[this.topic].subscribe({ next: (value) => {self.process(value)}});
+    }
   }
   process(value): void {
     var data = this.dracoProcess.convertData(value.payload);
@@ -211,9 +213,12 @@ export class RendererComponent implements AfterViewInit {
     {
       this.subscription.unsubscribe();
     }
-    this.ms.subscribe(changes.topic.currentValue);
-    this.ms.unsubscribe(changes.topic.previousValue);
-    this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {self.process(value)}});
+    if(this.ms && changes.topic.currentValue in this.ms.subjects)
+    {
+      this.ms.subscribe(changes.topic.currentValue);
+      this.ms.unsubscribe(changes.topic.previousValue);
+      this.subscription = this.ms.subjects[changes.topic.currentValue].subscribe({ next: (value) => {self.process(value)}});
+    }
   }
 
 

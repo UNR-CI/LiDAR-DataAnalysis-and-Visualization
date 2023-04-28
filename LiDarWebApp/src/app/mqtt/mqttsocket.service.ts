@@ -59,7 +59,8 @@ export class MqttSocketService {
  }
  
  public subscribe(topic) {
-  if(topic == "") {
+  console.log('test',topic);
+  if(!topic) {
     return;
   }
   if( topic in this.subscriptions && this.subscriptions[topic]) {
@@ -85,6 +86,9 @@ export class MqttSocketService {
  }
 
  public unsubscribe(topic) {
+  if(!topic){ 
+    return;
+  }
   if (topic in this.subscriptions) {
     this.subscriptions[topic].unsubscribe();
     delete this.subscriptions[topic];

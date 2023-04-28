@@ -28,6 +28,8 @@ import { DataFormComponent } from './ui_components/data-form/data-form.component
 import { SettingsComponent } from './ui_components/settings/settings.component';
 import { VisualizationsComponent } from './ui_components/visualizations/visualizations.component';
 import { ChartsComponent } from './ui_components/charts/charts.component';
+import { CesiumDirective } from './ui_components/cesium/cesium.directive';
+import { CesiumViewerComponent } from './ui_components/cesium/cesium-viewer.component';
 import {
   IMqttMessage,
   MqttModule,
@@ -53,7 +55,9 @@ const config: IMqttServiceOptions = {
     DataFormComponent,
     SettingsComponent,
     VisualizationsComponent,
-    ChartsComponent
+    ChartsComponent,
+    CesiumDirective,
+    CesiumViewerComponent
   ],
   imports: [
     BrowserModule,
