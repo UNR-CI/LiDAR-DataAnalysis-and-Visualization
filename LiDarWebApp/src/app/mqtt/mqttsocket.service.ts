@@ -76,6 +76,9 @@ export class MqttSocketService {
     pcd.time = json.timestamp;
     pcd.objects = json.objects;
     pcd.payload = file;
+    pcd.latitude = json.latitude
+    pcd.longitude = json.longitude;
+    pcd.forwarddirection = json.forwarddirection;
     this.subjects[topic].next(pcd);
     //console.log('acquire');
    });

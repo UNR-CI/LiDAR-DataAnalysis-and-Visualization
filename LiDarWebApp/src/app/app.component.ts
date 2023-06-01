@@ -30,4 +30,8 @@ export class PCD{
   intensity:number[];
   payload?:Uint8Array=null;
   objects:any;
+
+  forwarddirection:number;
+  latitude:number;
+  longitude:number;
 }

@@ -10,7 +10,7 @@
 import { AfterViewInit, Component,  Input, ViewChild, ElementRef, ContentChild, NgZone } from '@angular/core';
 import { DataService } from '../data.service';
 import { Color, WebGLRenderer, PerspectiveCamera, BoxGeometry, BufferGeometry, Float32BufferAttribute, Points,
-  PointsMaterial, MeshBasicMaterial, Mesh, Scene } from 'three';
+  PointsMaterial, MeshBasicMaterial, Mesh, Scene, SphereGeometry } from 'three';
 import { OrbitControls } from '@avatsaev/three-orbitcontrols-ts';
 import * as STATS from 'stats-js';
 import { Observable, Subscription } from 'rxjs';
@@ -19,6 +19,7 @@ import { PCD } from '@app/app.component';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DracoService } from '@app/draco/draco.service';
 import { SimpleChanges } from '@angular/core';
+
 @Component
 ({
   selector: 'three-renderer',
@@ -34,6 +35,7 @@ export class RendererComponent implements AfterViewInit {
   private pcdPoints: Points;
   public renderer: WebGLRenderer;
   public controls: OrbitControls;
+  private sphere: Mesh[];
   subscription : Subscription;
   dracoProcess:DracoService;
   ms : MqttSocketService;
@@ -63,7 +65,7 @@ export class RendererComponent implements AfterViewInit {
     var data = this.dracoProcess.convertData(value.payload);
     this.pointCloud = {time: value.time, topic: value.topic, x: data.x, 
       y: data.y, z: data.z, intensity: data.intensity, 
-      objects: value.objects, payload: null};
+      objects: value.objects, payload: null, latitude: value.latitude, longitude: value.longitude, forwarddirection: value.forwarddirection};
   }
 
   @Input() color: string | number | Color = 0x000000;
@@ -83,8 +85,31 @@ export class RendererComponent implements AfterViewInit {
       stats.showPanel( 1 );
       document.body.appendChild( stats.dom );
     }
+    // Set three renderer and controls
+    this.renderer = new WebGLRenderer( { canvas: this.canvas, antialias: true, alpha: true } ); // render
+    this.renderer.setPixelRatio( devicePixelRatio );
+    this.renderer.setClearColor( this.color, this.alpha );
+    this.renderer.setSize( window.innerWidth/2, window.innerHeight/2 );
+    this.renderer.autoClear = true;
 
     // Create three elements 
+    this.sphere = [];
+    var sphereGeometry = new SphereGeometry(1,32,16);
+    var sphereMaterial = new MeshBasicMaterial( { color: 0xffff00}); 
+    var sphere = new Mesh(sphereGeometry,sphereMaterial);
+    sphere.position.set(0,0,0);
+    this.sphere.push(sphere);
+
+    var sphereMaterial = new MeshBasicMaterial( { color: 0xffffff}); 
+    sphere = new Mesh(sphereGeometry,sphereMaterial);
+    sphere.position.set(3,0,0);
+    this.sphere.push(sphere);
+
+    var sphereMaterial = new MeshBasicMaterial( { color: 0x00ffff}); 
+    sphere = new Mesh(sphereGeometry,sphereMaterial);
+    sphere.position.set(0,3,0);
+    this.sphere.push(sphere);
+
     var geometry = new BufferGeometry();
     var positions = new Array(80000 * 3);
     var colors = new Array(80000 * 3);
@@ -100,18 +125,17 @@ export class RendererComponent implements AfterViewInit {
     var material = new PointsMaterial( { size: this.ds.pointSizeValue, color: 0xffffff, vertexColors: true });
     this.pcdPoints = new Points( geometry, material );
     this.pcdScene.add( this.pcdPoints );
+    //this.sphere.needsUpdate = true;
+    this.sphere.forEach((sphere) => {this.pcdScene.add(sphere);})
+      
+    
+
     this.pcdScene.background = new Color(0x000000);
 
     this.pcamera.updateProjectionMatrix();
     this.pcamera.position.set(0, -25, 0);
     this.pcamera.lookAt( this.pcdScene.position );
 
-    // Set three renderer and controls
-    this.renderer = new WebGLRenderer( { canvas: this.canvas, antialias: true, alpha: true } ); // render
-    this.renderer.setPixelRatio( devicePixelRatio );
-    this.renderer.setClearColor( this.color, this.alpha );
-    this.renderer.setSize( window.innerWidth/2, window.innerHeight/2 );
-    this.renderer.autoClear = true;
 
     this.controls = new OrbitControls( this.pcamera, this.canvas );
     this.controls.autoRotate = false;
@@ -168,37 +192,50 @@ export class RendererComponent implements AfterViewInit {
     const positions = this.pcdPoints.geometry.attributes.position.array;
     const colors = this.pcdPoints.geometry.attributes.color.array;
 
+    console.log(this.pointCloud['forwarddirection']);
+    if(this.pointCloud['forwarddirection']) {
+      this.pcdPoints.rotation.set(0,0,3.14 / 180.0 * this.pointCloud['forwarddirection']);
+      this.pcdPoints.updateMatrix();
+    }
+    //this.pcdPoints.rotateZ(3.14 / 2)
+    //console.log(vertX);
+    //console.log(boundBox);
+    if(vertX)
     for ( var i=0; i < vertX.length; i++ ){
       this.pcdPoints.geometry.attributes.position.setXYZ(i, vertX[i], vertY[i], vertZ[i]);
       this.pcdPoints.geometry.attributes.color.setXYZ(i, colorPicked.r, colorPicked.g, colorPicked.b);
       
       // Additional Loop to check for cars and pedestrians to set/change color of each
-      for( var j=0; j < boundBox.length; j++) {
-        if(boundBox[j]['minx'] < vertX[i] && boundBox[j]['maxx'] > vertX[i] 
-          && boundBox[j]['miny'] < vertY[i] && boundBox[j]['maxy'] > vertY[i] 
-          && boundBox[j]['minz'] < vertZ[i] && boundBox[j]['maxz'] > vertZ[i]) {
+      if( boundBox != null)
+        for( var j=0; j < boundBox.length; j++) {
+          if(boundBox[j]['minx'] < vertX[i] && boundBox[j]['maxx'] > vertX[i] 
+            && boundBox[j]['miny'] < vertY[i] && boundBox[j]['maxy'] > vertY[i] 
+            && boundBox[j]['minz'] < vertZ[i] && boundBox[j]['maxz'] > vertZ[i]) {
 
-          let xsize = this.pointCloud.objects[j].maxx - this.pointCloud.objects[j].minx;
-          let ysize = this.pointCloud.objects[j].maxy - this.pointCloud.objects[j].miny;
-          let zsize = this.pointCloud.objects[j].maxz - this.pointCloud.objects[j].minz;
+            let xsize = this.pointCloud.objects[j].maxx - this.pointCloud.objects[j].minx;
+            let ysize = this.pointCloud.objects[j].maxy - this.pointCloud.objects[j].miny;
+            let zsize = this.pointCloud.objects[j].maxz - this.pointCloud.objects[j].minz;
 
-          let volume = xsize * ysize * zsize;
+            let volume = xsize * ysize * zsize;
 
-          // Average volume of pedestrian
-          if(volume > 0.1) {
-            this.pcdPoints.geometry.attributes.color.setXYZ(i, carColorP.r, carColorP.g, carColorP.b);
-          }
-          else {
-            this.pcdPoints.geometry.attributes.color.setXYZ(i, pedColorP.r, pedColorP.g, pedColorP.b);
+            // Average volume of pedestrian
+            if(volume > 0.1) {
+              this.pcdPoints.geometry.attributes.color.setXYZ(i, carColorP.r, carColorP.g, carColorP.b);
+            }
+            else {
+              this.pcdPoints.geometry.attributes.color.setXYZ(i, pedColorP.r, pedColorP.g, pedColorP.b);
+            }
           }
         }
-      }
     }
 
     this.pcdPoints.geometry.attributes.position.needsUpdate = true;
     this.pcdPoints.geometry.attributes.color.needsUpdate = true;
     this.pcdPoints.geometry.setDrawRange(0, vertX.length);
     this.pcdPoints.geometry.computeBoundingSphere();
+
+    //this.sphere.geometry.attributes.position.needsUpdate = true;
+    //this.sphere.geometry.attributes.color.needsUpdate = true;
   }
 
   // Call to render function which renders the main scene
