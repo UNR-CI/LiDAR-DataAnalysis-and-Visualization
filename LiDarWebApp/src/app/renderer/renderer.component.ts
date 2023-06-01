@@ -243,7 +243,8 @@ export class RendererComponent implements AfterViewInit {
       console.log(pointCloud['forwarddirection']);
       console.log(utm['Easting'],utm['Northing']);
       //257759.0015798236, 5619067.676596848
-      pcdPoints.position.set(utm['Easting']-257759.0015798236,utm['Northing']-5619067.676596848,0);
+
+      pcdPoints.position.set(utm['Easting']-257759.00158,utm['Northing']-4380932.3234,0);
       if (pointCloud['forwarddirection']) {
         pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
       }
