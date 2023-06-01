@@ -218,7 +218,7 @@ export class RendererComponent implements AfterViewInit {
       var pcdPoints = this.pcdPointsArray[topic];
       var vertices = [];
       var latitude = parseFloat(pointCloud['latitude']);
-      if (pointCloud['latitude'].indexOf('N') > -1)
+      if (pointCloud['latitude'].indexOf('S') > -1)
       {
         latitude = -latitude;
       }
