@@ -15,6 +15,14 @@
         </mat-select>
       </mat-form-field>
 
+      <mat-form-field>
+        <mat-select placeholder="Select Location" [(value)]="selectedTopic2">
+          <mat-option *ngFor="let topicStruct of topicList" [value]="topicStruct.topic">
+            {{ topicStruct.viewTopic }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <div style="text-align:center">
           <h2 class="text-secondary" style="padding: 10px; margin-bottom: 0;">
             Charts and Graphs 
@@ -27,7 +35,7 @@
         <mat-card fxFlex="1 1 50%" style="position:relative">
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
           <div class="align-chart-center">
-            <three-renderer color='#000000' [topic]="selectedTopic"></three-renderer>
+            <three-renderer color='#000000' [topic]="selectedTopic" [topic2]="selectedTopic2"></three-renderer>
           </div>
           <!--<div class="align-chart-center" *ngFor="let topicitem of topicList;" >
             <mat-button-toggle-group name="enable" #group="matButtonToggleGroup" value="off">

@@ -152,12 +152,15 @@ export class VisualizationsComponent implements OnInit {
   }
 
   selectedTopic: String;
+  selectedTopic2: String;
 
   change(event) {
     if(event.isUserInput) {
       this.ds.selectedTopic = event.source.value;
       this.ms.subscribe(event.source.value);
       this.selectedTopic = event.source.value;
+      console.log(this.selectedTopic2);
+      console.log(event.source.value);
       console.log(event.source.value, event.source.selected);
     }
   }

@@ -32,6 +32,6 @@ export class PCD{
   objects:any;
 
   forwarddirection:number;
-  latitude:number;
-  longitude:number;
+  latitude:string;
+  longitude:string;
 }
