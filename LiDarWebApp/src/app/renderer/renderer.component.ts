@@ -11,7 +11,7 @@ import { AfterViewInit, Component, Input, ViewChild, ElementRef, ContentChild, N
 import { DataService } from '../data.service';
 import {
   Color, WebGLRenderer, PerspectiveCamera, BoxGeometry, BufferGeometry, Float32BufferAttribute, Points,
-  PointsMaterial, MeshBasicMaterial, Mesh, Scene, SphereGeometry
+  PointsMaterial, MeshBasicMaterial, Mesh, Scene, SphereGeometry, Vector3
 } from 'three';
 import { OrbitControls } from '@avatsaev/three-orbitcontrols-ts';
 import * as STATS from 'stats-js';
@@ -44,6 +44,8 @@ export class RendererComponent implements AfterViewInit {
   public controls: OrbitControls;
   private sphere: Mesh[];
   private utmConvert:any = new utmObj();
+  newTopicFirst:boolean = false;
+  newTopicSecond:boolean = false;
   subscriptions: { [key: string]: Subscription };
   dracoProcess: DracoService;
   ms: MqttSocketService;
@@ -112,7 +114,7 @@ export class RendererComponent implements AfterViewInit {
     var sphereGeometry = new SphereGeometry(1, 32, 16);
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffff00 });
     var sphere = new Mesh(sphereGeometry, sphereMaterial);
-    sphere.position.set(0, 0, 0);
+    sphere.position.set(257759.00158, 4380932.3234, 0);
     this.sphere.push(sphere);
 
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffffff });
@@ -147,22 +149,34 @@ export class RendererComponent implements AfterViewInit {
 
     this.pcdScene.background = new Color(0x000000);
 
-    this.pcamera.updateProjectionMatrix();
-    //Easting: 257759.0015798236, Northing: 5619067.676596848
-    this.pcamera.position.set(0, -25, 0);
-    //this.pcamera.position.set(257759.0015798236, 5619067.676596848-25, 0);
-    this.pcamera.lookAt(this.pcdScene.position);
 
+    //this.pcamera.updateProjectionMatrix();
+    //Easting: 257759.0015798236, Northing: 5619067.676596848
+    
+    //this.pcamera.position.set(257759.0015798236, 5619067.676596848-25, 0);
+    //this.pcamera.lookAt(0,0,0);
+    //this.pcamera.updateMatrix();
+    //this.pcamera.updateProjectionMatrix();
 
     this.controls = new OrbitControls(this.pcamera, this.canvas);
     this.controls.autoRotate = false;
     this.controls.enableZoom = true;
     this.controls.enablePan = true;
+    this.controls.target.set(257759.00158, 4380932.3234,0);
     this.controls.update();
 
+    this.pcamera.position.set(257759.00158, 4380932.3234,25);
+    this.controls.update();
+
+    //this.pcamera.position.set(0,0,25);
+    //this.controls.target.set(0,0,0);
+    //this.controls.update();
+
+
+
     // Reset Camera position after controls update
-    this.pcamera.position.x = 0;
-    this.pcamera.position.z = 30;
+    //this.pcamera.position.x = 0;
+    //this.pcamera.position.z = 30;
     var self = this;
     // Function runs animate outside of Angular to not overload the app
     this.zone.runOutsideAngular(_ => {
@@ -178,9 +192,11 @@ export class RendererComponent implements AfterViewInit {
 
           //if (this.pointClouds.key) {
           this.updateBuffer();
+          this.controls.update();
+          
           //}
 
-          this.controls.update();
+          
           this.render();
           stats.end();
         } else {
@@ -244,7 +260,7 @@ export class RendererComponent implements AfterViewInit {
       console.log(utm['Easting'],utm['Northing']);
       //257759.0015798236, 5619067.676596848
 
-      pcdPoints.position.set(utm['Easting']-257759.00158,utm['Northing']-4380932.3234,0);
+      pcdPoints.position.set(utm['Easting'],utm['Northing'],0);
       if (pointCloud['forwarddirection']) {
         pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
       }
@@ -293,12 +309,30 @@ export class RendererComponent implements AfterViewInit {
 
   // Function that updates the position and color of the points
   updateBuffer() {
-    if(this.topic)
-    {
-      //this.pcamera.lookAt(this.pcdPointsArray[this.topic].position);
-    }
+
     this.updatePointCloud(this.topic);
+    if(this.topic && this.newTopicFirst)
+    { 
+      console.log(this.pcdPointsArray[this.topic].position);
+      this.pcamera.position.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,25);
+      this.controls.update();
+
+      this.controls.target.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,this.pcdPointsArray[this.topic].position.z);
+      this.controls.update();
+      this.newTopicFirst = false;
+      
+    }
+
     this.updatePointCloud(this.topic2);
+    if(this.topic2 && this.newTopicSecond)
+    { 
+      this.pcamera.position.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,25);
+      this.controls.update();
+
+      this.controls.target.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,this.pcdPointsArray[this.topic2].position.z);
+      this.controls.update();
+      this.newTopicSecond = false;
+    }
   }
 
   // Call to render function which renders the main scene
@@ -323,6 +357,7 @@ export class RendererComponent implements AfterViewInit {
       if (changes.topic.previousValue in this.pcdPointsArray) {
         this.pcdScene.remove(this.pcdPointsArray[changes.topic.previousValue]);
       }
+      this.newTopicFirst = true;
     }
     if (changes.topic2 && this.ms && changes.topic2.currentValue in this.ms.subjects) {
       if (changes.topic2.previousValue in this.subscriptions) {
@@ -337,6 +372,7 @@ export class RendererComponent implements AfterViewInit {
       if (changes.topic2.previousValue in this.pcdPointsArray) {
         this.pcdScene.remove(this.pcdPointsArray[changes.topic2.previousValue]);
       }
+      this.newTopicSecond = true;
     }
   }
 
