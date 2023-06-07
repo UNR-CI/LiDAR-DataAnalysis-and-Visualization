@@ -35,7 +35,11 @@
         <mat-card fxFlex="1 1 50%" style="position:relative">
           <h3><b>Near Real Time 3D Mesh Render</b></h3>
           <div class="align-chart-center">
-            <three-renderer color='#000000' [topic]="selectedTopic" [topic2]="selectedTopic2"></three-renderer>
+            <body id="testor">
+              <div appCesium></div>
+              <three-renderer [topic]="selectedTopic" [topic2]="selectedTopic2" id="canvasrender"></three-renderer>
+              
+            </body>
           </div>
           <!--<div class="align-chart-center" *ngFor="let topicitem of topicList;" >
             <mat-button-toggle-group name="enable" #group="matButtonToggleGroup" value="off">

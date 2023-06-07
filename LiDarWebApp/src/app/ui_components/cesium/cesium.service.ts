@@ -23,6 +23,10 @@ export class CesiumService {
 
   }
 
+  getCesiumCamera() {
+    return this.viewer.camera;
+  }
+  
   addExampleEntity() {
     var sphereEntity = this.viewer.entities.add({
       name: "Sample Sphere",

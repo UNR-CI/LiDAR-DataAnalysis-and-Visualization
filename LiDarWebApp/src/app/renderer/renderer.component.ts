@@ -21,6 +21,8 @@ import { PCD } from '@app/app.component';
 import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DracoService } from '@app/draco/draco.service';
 import { SimpleChanges } from '@angular/core';
+import { CesiumService } from '@app/ui_components/cesium/cesium.service';
+import {  Math,PerspectiveFrustum,Cartographic } from 'cesium';
 //import * as  UTMLatLng  from 'utm-latlng-orabazu';
 var utmObj = require('utm-latlng-orabazu');
 //UTMLatLng
@@ -28,7 +30,7 @@ var utmObj = require('utm-latlng-orabazu');
 @Component
   ({
     selector: 'three-renderer',
-    template: '<canvas #canvas></canvas>'
+    template: '<div><canvas #canvas ></canvas></div>'
   })
 
 // Main Class
@@ -55,9 +57,10 @@ export class RendererComponent implements AfterViewInit {
   get canvas(): HTMLCanvasElement { return this.canvasReference.nativeElement; }
 
   // Constructor builds three scene and camera
-  constructor(private ds: DataService, readonly zone: NgZone, ms: MqttSocketService, private _draco: DracoService) {
+  constructor(private ds: DataService, readonly zone: NgZone, ms: MqttSocketService, private _draco: DracoService, private _cesiumService:CesiumService) {
     this.pcdScene = new Scene();
-    this.pcamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    this.pcamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000000);
     this.ms = ms;
     this.dracoProcess = _draco;
     console.log('inited!');
@@ -105,16 +108,27 @@ export class RendererComponent implements AfterViewInit {
     // Set three renderer and controls
     this.renderer = new WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true }); // render
     this.renderer.setPixelRatio(devicePixelRatio);
-    this.renderer.setClearColor(this.color, this.alpha);
-    this.renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
+    //this.renderer.setClearColor(0xffffff, 0);
+    this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.renderer.autoClear = true;
 
     // Create three elements 
     this.sphere = [];
-    var sphereGeometry = new SphereGeometry(1, 32, 16);
+    var sphereGeometry = new SphereGeometry(100, 32, 16);
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffff00 });
     var sphere = new Mesh(sphereGeometry, sphereMaterial);
-    sphere.position.set(257759.00158, 4380932.3234, 0);
+    var camera = this._cesiumService.getCesiumCamera();
+    
+    var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
+    //4039062.5175966527
+    var position = Cartographic.toCartesian(displacement);
+    console.log(displacement);
+    console.log(position);
+    //position.z = 4035728.60582164;
+    sphere.position.set(position.x,position.y,position.z);
+    //camera.worldToCameraCoordinates()
+    //sphere.position.set(-2445899.5048352405, -4276740.309637379, 4037498.5638592127);
+
     this.sphere.push(sphere);
 
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffffff });
@@ -147,7 +161,7 @@ export class RendererComponent implements AfterViewInit {
 
 
 
-    this.pcdScene.background = new Color(0x000000);
+    //this.pcdScene.background = null;
 
 
     //this.pcamera.updateProjectionMatrix();
@@ -158,15 +172,15 @@ export class RendererComponent implements AfterViewInit {
     //this.pcamera.updateMatrix();
     //this.pcamera.updateProjectionMatrix();
 
-    this.controls = new OrbitControls(this.pcamera, this.canvas);
-    this.controls.autoRotate = false;
-    this.controls.enableZoom = true;
-    this.controls.enablePan = true;
-    this.controls.target.set(257759.00158, 4380932.3234,0);
-    this.controls.update();
+    //this.controls = new OrbitControls(this.pcamera, this.canvas);
+    //this.controls.autoRotate = false;
+    //this.controls.enableZoom = true;
+    //this.controls.enablePan = true;
+    //this.controls.target.set(257759.00158, 4380932.3234,0);
+    //this.controls.update();
 
-    this.pcamera.position.set(257759.00158, 4380932.3234,25);
-    this.controls.update();
+    //this.pcamera.position.set(257759.00158, 4380932.3234,25);
+    //this.controls.update();
 
     //this.pcamera.position.set(0,0,25);
     //this.controls.target.set(0,0,0);
@@ -190,10 +204,51 @@ export class RendererComponent implements AfterViewInit {
 
           stats.begin();
 
-          //if (this.pointClouds.key) {
-          this.updateBuffer();
-          this.controls.update();
+          //if (this.pointClouds.key) { 
+
+
+          var camera = this._cesiumService.getCesiumCamera()
+          this.pcamera.fov = Math.toDegrees((camera.frustum as PerspectiveFrustum).fovy) // ThreeJS FOV is vertical
+          this.pcamera.updateProjectionMatrix();
+          var cvm = camera.viewMatrix;
+          var civm = camera.inverseViewMatrix;
+          this.pcamera.position.set(camera.position.x,camera.position.y,camera.position.z)
+          console.log(camera.position);
+          //console.log(cvm)
+          //console.log(civm);
+          this.pcamera.matrixAutoUpdate = false;
+          this.pcamera.matrixWorld.set(
+            civm[0], civm[4], civm[8 ], civm[12],
+            civm[1], civm[5], civm[9 ], civm[13],
+            civm[2], civm[6], civm[10], civm[14],
+            civm[3], civm[7], civm[11], civm[15]
+          );
+          this.pcamera.matrixWorldInverse.set(
+            cvm[0], cvm[4], cvm[8 ], cvm[12],
+            cvm[1], cvm[5], cvm[9 ], cvm[13],
+            cvm[2], cvm[6], cvm[10], cvm[14],
+            cvm[3], cvm[7], cvm[11], cvm[15]
+          );
+
+          //this.pcamera.up.set(camera.up.x,camera.up.y,camera.up.z);
+
+          //this.pcamera.lookAt(new Vector3(0,0,0));
+          //this.pcamera.updateMatrix()
           
+          //this.pcamera.matrix.set(camera.transform[0],camera.transform[1],camera.transform[2],camera.transform[3],
+          //  camera.transform[4],camera.transform[5],camera.transform[6],camera.transform[7],
+          //  camera.transform[8],camera.transform[9],camera.transform[10],camera.transform[11],
+          //  camera.transform[12],camera.transform[13],camera.transform[14],camera.transform[15]);
+          //console.log(this.pcamera.position);
+          //camera.c
+          //console.log(camera.worldToCameraCoordinatesPoint(this.pcamera.position));
+          //this.sphere[0].position
+          //this.updateBuffer();
+          //this.controls.update();
+          var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
+          var position = Cartographic.toCartesian(displacement);
+          console.log(4035728.60582164,this.sphere[0].position,position);
+
           //}
 
           
@@ -315,10 +370,10 @@ export class RendererComponent implements AfterViewInit {
     { 
       console.log(this.pcdPointsArray[this.topic].position);
       this.pcamera.position.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,25);
-      this.controls.update();
+      //this.controls.update();
 
-      this.controls.target.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,this.pcdPointsArray[this.topic].position.z);
-      this.controls.update();
+      //this.controls.target.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,this.pcdPointsArray[this.topic].position.z);
+      //this.controls.update();
       this.newTopicFirst = false;
       
     }
@@ -327,10 +382,10 @@ export class RendererComponent implements AfterViewInit {
     if(this.topic2 && this.newTopicSecond)
     { 
       this.pcamera.position.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,25);
-      this.controls.update();
+      //this.controls.update();
 
-      this.controls.target.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,this.pcdPointsArray[this.topic2].position.z);
-      this.controls.update();
+      //this.controls.target.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,this.pcdPointsArray[this.topic2].position.z);
+     //this.controls.update();
       this.newTopicSecond = false;
     }
   }

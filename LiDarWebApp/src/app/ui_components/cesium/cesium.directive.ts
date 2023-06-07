@@ -1,5 +1,5 @@
 import { Directive, ElementRef, OnInit } from '@angular/core';
-import { Viewer, Cartesian3, Color, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen } from 'cesium';
+import { TileMapServiceImageryProvider, Viewer, Cartesian3, Color, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen } from 'cesium';
 import { CesiumService } from './cesium.service';
 @Directive({
   selector: '[appCesium]'
@@ -15,7 +15,22 @@ export class CesiumDirective implements OnInit {
   ngOnInit(): void {
     this.class = "fullscreen";
     // Create a Cesium viewer
-    this.viewer = new Viewer(this.el.nativeElement, { fullscreenButton: false });
+    var contextOptions = {
+      webgl:{
+      alpha: false,
+      antialias: true,
+      preserveDrawingBuffer: true,
+      failIfMajorPerformanceCaveat: false,
+      depth:true,
+      stencil:false,
+      anialias:false
+      }
+    } 
+    this.viewer = new Viewer(this.el.nativeElement, 
+      { fullscreenButton: false, 
+        contextOptions: contextOptions,
+        orderIndependentTranslucency : true
+      });
     this.cesiumService.setViewer(this.viewer);
 
     // Create a TimeIntervalCollection
