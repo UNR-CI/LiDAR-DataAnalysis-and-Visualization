@@ -22,7 +22,8 @@ import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DracoService } from '@app/draco/draco.service';
 import { SimpleChanges } from '@angular/core';
 import { CesiumService } from '@app/ui_components/cesium/cesium.service';
-import {  Math,PerspectiveFrustum,Cartographic } from 'cesium';
+import {  Math,PerspectiveFrustum,Cartographic, JulianDate } from 'cesium';
+import { DOCUMENT } from '@angular/common'; 
 //import * as  UTMLatLng  from 'utm-latlng-orabazu';
 var utmObj = require('utm-latlng-orabazu');
 //UTMLatLng
@@ -55,12 +56,11 @@ export class RendererComponent implements AfterViewInit {
   pointCloud: PCD;
   private pointClouds: { [key: string]: PCD };
   get canvas(): HTMLCanvasElement { return this.canvasReference.nativeElement; }
-
+  el:HTMLElement;
   // Constructor builds three scene and camera
   constructor(private ds: DataService, readonly zone: NgZone, ms: MqttSocketService, private _draco: DracoService, private _cesiumService:CesiumService) {
-    this.pcdScene = new Scene();
-    
-    this.pcamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000000);
+
+
     this.ms = ms;
     this.dracoProcess = _draco;
     console.log('inited!');
@@ -68,6 +68,10 @@ export class RendererComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.pcdScene = new Scene();
+    this.el = document.getElementById('testor') as HTMLElement;
+    console.log(this.el);
+    this.pcamera = new PerspectiveCamera(75, this.el.offsetWidth / this.el.offsetHeight, 0.1, 10000000);
     //this.ms.subscribe(this.topic);
     var self = this;
     self.pointClouds = {};
@@ -109,7 +113,7 @@ export class RendererComponent implements AfterViewInit {
     this.renderer = new WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true }); // render
     this.renderer.setPixelRatio(devicePixelRatio);
     //this.renderer.setClearColor(0xffffff, 0);
-    this.renderer.setSize(window.innerWidth , window.innerHeight);
+    this.renderer.setSize(this.el.offsetWidth , this.el.offsetHeight);
     this.renderer.autoClear = true;
 
     // Create three elements 
@@ -120,16 +124,21 @@ export class RendererComponent implements AfterViewInit {
     var camera = this._cesiumService.getCesiumCamera();
     
     var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
+    //var ent = this._cesiumService.addEntity(-119.81854309810514,39.5438915231015,30);
+    //console.log('position: ' + ent.position.getValue(JulianDate.now()));
     //4039062.5175966527
     var position = Cartographic.toCartesian(displacement);
     console.log(displacement);
     console.log(position);
     //position.z = 4035728.60582164;
     sphere.position.set(position.x,position.y,position.z);
+    console.log('position (three): ' + position);
+    //console.log('up ' + ent.orientation);
+    console.log('up (three): ' + sphere.up.x + ' ' + sphere.up.y + ' ' + sphere.up.z);
     //camera.worldToCameraCoordinates()
     //sphere.position.set(-2445899.5048352405, -4276740.309637379, 4037498.5638592127);
 
-    this.sphere.push(sphere);
+    //this.sphere.push(sphere);
 
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffffff });
     sphere = new Mesh(sphereGeometry, sphereMaterial);
@@ -208,12 +217,18 @@ export class RendererComponent implements AfterViewInit {
 
 
           var camera = this._cesiumService.getCesiumCamera()
-          this.pcamera.fov = Math.toDegrees((camera.frustum as PerspectiveFrustum).fovy) // ThreeJS FOV is vertical
+          this.pcamera.fov = Math.toDegrees((camera.frustum as PerspectiveFrustum).fovy); // ThreeJS FOV is vertical
+          //this.pcamera.aspect = (camera.frustum as PerspectiveFrustum).aspectRatio;
           this.pcamera.updateProjectionMatrix();
+          //this.pcamera.fov
+          //this.pcamera.PerspectiveFrustum.fovy
           var cvm = camera.viewMatrix;
           var civm = camera.inverseViewMatrix;
-          this.pcamera.position.set(camera.position.x,camera.position.y,camera.position.z)
+          this.pcamera.position.set(camera.position.x,camera.position.y,camera.position.z);
+          console.log(camera.frustum);
           console.log(camera.position);
+          console.log(camera.positionWC);
+          console.log(camera.positionCartographic);
           //console.log(cvm)
           //console.log(civm);
           this.pcamera.matrixAutoUpdate = false;
@@ -243,12 +258,12 @@ export class RendererComponent implements AfterViewInit {
           //camera.c
           //console.log(camera.worldToCameraCoordinatesPoint(this.pcamera.position));
           //this.sphere[0].position
-          //this.updateBuffer();
+          this.updateBuffer();
           //this.controls.update();
           var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
           var position = Cartographic.toCartesian(displacement);
           console.log(4035728.60582164,this.sphere[0].position,position);
-
+          
           //}
 
           
@@ -315,10 +330,16 @@ export class RendererComponent implements AfterViewInit {
       console.log(utm['Easting'],utm['Northing']);
       //257759.0015798236, 5619067.676596848
 
-      pcdPoints.position.set(utm['Easting'],utm['Northing'],0);
+
+      var displacement = Cartographic.fromDegrees(longitude,latitude);
+      var position = Cartographic.toCartesian(displacement);
+      
       if (pointCloud['forwarddirection']) {
         pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
       }
+      pcdPoints.updateMatrix();
+
+      pcdPoints.position.set(position.x,position.y,position.z);
       pcdPoints.updateMatrix();
       //ConvertLatLngToUtm(1,1,1);
       //this.pcdPoints.rotateZ(3.14 / 2)
