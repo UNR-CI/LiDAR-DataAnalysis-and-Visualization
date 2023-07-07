@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { CesiumService } from './cesium.service';
 import { HttpClient } from '@angular/common/http';
+import { JulianDate } from 'cesium';
 @Component({
   selector: 'app-cesium-viewer',
   /*template: '<div appCesium></div>',*/
@@ -23,7 +24,14 @@ export class CesiumViewerComponent {
       //console.log(response[0]); 
       for(let i=0; i<response.length; i++) {
         console.log(response[i].longitude,response[i].latitude);
-        this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1);
+        console.log(response[i].frametime);
+        console.log(JulianDate.fromIso8601(response[i].frametime));
+        var clock = this.cesiumService.viewer.clock;
+        clock.currentTime = JulianDate.fromIso8601(response[i].frametime);
+        clock.multiplier = 0;
+        var start = JulianDate.fromIso8601(response[i].frametime);
+        var end = JulianDate.addSeconds(start, 1, new JulianDate());
+        this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1,start,end);
       }
     });
     console.log(this.range.controls.start.value, this.range.controls.end.value);

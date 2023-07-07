@@ -82,6 +82,27 @@
                   "maximumError": "4kb"
                 }
               ]
+            }, 
+            "quick":{
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": true,
+              "buildOptimizer": false,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ]
             }
           }
         },
@@ -93,6 +114,9 @@
           "configurations": {
             "production": {
               "browserTarget": "LiDarWebApp:build:production"
+            },
+            "quick": {
+              "browserTarget": "LiDarWebApp:build:quick"
             }
           }
         },

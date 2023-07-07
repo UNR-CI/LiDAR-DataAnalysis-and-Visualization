@@ -44,6 +44,7 @@ export class VisualizationsComponent implements OnInit {
   public lineData = [];
 
   // Initialize Options for the charts
+  isViewerVisible = false;
   showXAxis = true;
   showYAxis = true;
   gradient = false;
@@ -148,7 +149,6 @@ export class VisualizationsComponent implements OnInit {
     }
     });
     //this.testObservable = new Observable<PCD>(this.ms.testObserver);
-
   }
 
   selectedTopic: String;

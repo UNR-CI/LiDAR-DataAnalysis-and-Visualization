@@ -59,8 +59,6 @@ export class RendererComponent implements AfterViewInit {
   el:HTMLElement;
   // Constructor builds three scene and camera
   constructor(private ds: DataService, readonly zone: NgZone, ms: MqttSocketService, private _draco: DracoService, private _cesiumService:CesiumService) {
-
-
     this.ms = ms;
     this.dracoProcess = _draco;
     console.log('inited!');

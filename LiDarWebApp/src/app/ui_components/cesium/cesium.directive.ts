@@ -1,6 +1,7 @@
-import { Directive, ElementRef, OnInit } from '@angular/core';
+import { Directive, ElementRef, Input, OnInit } from '@angular/core';
 import { TileMapServiceImageryProvider, Viewer, Cartesian3, Color, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen } from 'cesium';
 import { CesiumService } from './cesium.service';
+import { SimpleChanges } from '@angular/core';
 @Directive({
   selector: '[appCesium]'
 })
@@ -8,6 +9,7 @@ export class CesiumDirective implements OnInit {
 
   viewer: Viewer = null;
   cesiumService: CesiumService;
+
   constructor(private el: ElementRef, cesiumService: CesiumService) {
     this.cesiumService = cesiumService;
   }
@@ -141,7 +143,6 @@ export class CesiumDirective implements OnInit {
 
     this.viewer.timeline.zoomTo(start, JulianDate.addSeconds(start, 600, new JulianDate()));
     this.viewer.clock.currentTime = start;
-
   }
 
 }
