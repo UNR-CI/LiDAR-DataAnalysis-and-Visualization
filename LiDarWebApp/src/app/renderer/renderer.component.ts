@@ -22,8 +22,9 @@ import { MqttSocketService } from '@app/mqtt/mqttsocket.service';
 import { DracoService } from '@app/draco/draco.service';
 import { SimpleChanges } from '@angular/core';
 import { CesiumService } from '@app/ui_components/cesium/cesium.service';
-import {  Math,PerspectiveFrustum,Cartographic, JulianDate } from 'cesium';
+import {  Math as math,PerspectiveFrustum,Cartographic, JulianDate, Spherical, Cartesian3 } from 'cesium';
 import { DOCUMENT } from '@angular/common'; 
+
 //import * as  UTMLatLng  from 'utm-latlng-orabazu';
 var utmObj = require('utm-latlng-orabazu');
 //UTMLatLng
@@ -215,13 +216,14 @@ export class RendererComponent implements AfterViewInit {
 
 
           var camera = this._cesiumService.getCesiumCamera()
-          this.pcamera.fov = Math.toDegrees((camera.frustum as PerspectiveFrustum).fovy); // ThreeJS FOV is vertical
+          this.pcamera.fov = math.toDegrees((camera.frustum as PerspectiveFrustum).fovy); // ThreeJS FOV is vertical
           //this.pcamera.aspect = (camera.frustum as PerspectiveFrustum).aspectRatio;
           this.pcamera.updateProjectionMatrix();
           //this.pcamera.fov
           //this.pcamera.PerspectiveFrustum.fovy
           var cvm = camera.viewMatrix;
           var civm = camera.inverseViewMatrix;
+          //this.pcamera.up.set(camera.up.x,camera.up.y,camera.up.z);
           this.pcamera.position.set(camera.position.x,camera.position.y,camera.position.z);
           console.log(camera.frustum);
           console.log(camera.position);
@@ -314,6 +316,7 @@ export class RendererComponent implements AfterViewInit {
       console.log(latitude,longitude);
       
       var utm = this.utmConvert.convertLatLngToUtm(latitude,longitude,5);
+      this.utmConvert.convertLatLngToUtm()
       console.log(utm);
       var vertX = pointCloud['x'];
       var vertY = pointCloud['y'];
@@ -325,6 +328,8 @@ export class RendererComponent implements AfterViewInit {
       const pedColorP = new Color(this.ds.pedestrianColor); // Color for Pedestrians
 
       console.log(pointCloud['forwarddirection']);
+      console.log('ttttttttttttttttt')
+      console.log(utm);
       console.log(utm['Easting'],utm['Northing']);
       //257759.0015798236, 5619067.676596848
 
@@ -332,20 +337,36 @@ export class RendererComponent implements AfterViewInit {
       var displacement = Cartographic.fromDegrees(longitude,latitude);
       var position = Cartographic.toCartesian(displacement);
       
-      if (pointCloud['forwarddirection']) {
-        pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
-      }
-      pcdPoints.updateMatrix();
+      //if (pointCloud['forwarddirection']) {
+      //  pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
+      //}
+      //pcdPoints.updateMatrix();
 
-      pcdPoints.position.set(position.x,position.y,position.z);
-      pcdPoints.updateMatrix();
+      //pcdPoints.position.set(position.x,position.y,position.z);
+      //pcdPoints.updateMatrix();
+      
       //ConvertLatLngToUtm(1,1,1);
       //this.pcdPoints.rotateZ(3.14 / 2)
       //console.log(vertX);
       //console.log(boundBox);
       if (vertX)
         for (var i = 0; i < vertX.length; i++) {
-          pcdPoints.geometry.attributes.position.setXYZ(i, vertX[i], vertY[i], vertZ[i]);
+          var out = this.utmConvert.convertUtmToLatLng(utm['Easting']+vertX[i],utm['Northing']+vertY[i],11,utm['ZoneLetter']);
+          var displacement = Cartographic.fromDegrees(out.lng,out.lat,Math.abs(vertZ[i]));
+          
+          var position = Cartographic.toCartesian(displacement);
+          var output = Cartographic.fromCartesian(new Cartesian3(position.x,position.y,position.z));
+          if (i == 0)
+          console.log('position',position.x,position.y,position.z);
+          if(i==0) {
+            console.log(this.utmConvert.convertUtmToLatLng(utm['Easting']+vertX[i],utm['Northing']+vertY[i],11,utm['ZoneLetter']));
+            console.log(latitude,longitude);
+          }
+          position = Cartographic.toCartesian(output);
+          if (i == 0)
+          console.log(position.x,position.y,position.z);
+          //position = Cartographic.fromRadians(output.)
+          pcdPoints.geometry.attributes.position.setXYZ(i, position.x, position.y, position.z);
           pcdPoints.geometry.attributes.color.setXYZ(i, colorPicked.r, colorPicked.g, colorPicked.b);
 
           // Additional Loop to check for cars and pedestrians to set/change color of each

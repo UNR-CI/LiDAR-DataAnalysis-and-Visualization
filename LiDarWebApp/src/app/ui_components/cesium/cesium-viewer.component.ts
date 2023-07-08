@@ -20,7 +20,7 @@ export class CesiumViewerComponent {
   }
   click() {
     this.cesiumService.addExampleEntity();
-    this.httpClient.get('http://localhost:5000/trajectory').subscribe((response: any) => { 
+    this.httpClient.get('http://localhost:5000/trajectoryinfo').subscribe((response: any) => { 
       //console.log(response[0]); 
       for(let i=0; i<response.length; i++) {
         console.log(response[i].longitude,response[i].latitude);
@@ -31,7 +31,9 @@ export class CesiumViewerComponent {
         clock.multiplier = 0;
         var start = JulianDate.fromIso8601(response[i].frametime);
         var end = JulianDate.addSeconds(start, 1, new JulianDate());
-        this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1,start,end);
+        //this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1,start,end);
+
+        this.cesiumService.addBoundingBox(response[i].longitude,response[i].latitude,1,response[i].dir_x_bbox,response[i].dir_y_bbox,response[i].width,response[i].length,response[i].height,start,end);
       }
     });
     console.log(this.range.controls.start.value, this.range.controls.end.value);

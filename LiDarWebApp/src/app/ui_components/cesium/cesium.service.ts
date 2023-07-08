@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { createDecoderModule, draco } from 'draco3d';
-import { Viewer, Cartesian3, Color, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen } from 'cesium';
+import { Viewer, Cartesian3, Color, BoxGeometry, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen, Spherical, AxisAlignedBoundingBox } from 'cesium';
 import { NonNullableFormBuilder } from '@angular/forms';
 
 @Injectable({
@@ -67,6 +67,48 @@ export class CesiumService {
     this.viewer.camera.flyTo({destination:Cartesian3.fromDegrees(longitude, latitude)});
     
     return sphereEntity;
+  };
+
+  addBoundingBox(longitude:number,latitude:number,size:number,dir_x_bbox:number,dir_y_bbox:number, width:number, length:number, height:number, startTime:JulianDate=null,endTime:JulianDate=null){
+    var timeIntervals = new TimeIntervalCollection();
+    if (startTime != null) {
+      timeIntervals.addInterval(new TimeInterval({
+        start: startTime,
+        stop: endTime
+      }));
+    }
+    var point = Cartesian3.fromDegrees(longitude, latitude);
+    Spherical.fromCartesian3
+    var maxCorner = point.clone();
+    var minCorner = point.clone();
+    maxCorner.x += dir_x_bbox * 20;
+    maxCorner.y += dir_y_bbox * 20;
+    minCorner.x -= dir_x_bbox * 20;
+    minCorner.y -= dir_y_bbox * 20;
+    console.log(width);
+    console.log(height);
+    console.log(point);
+    console.log('point');
+    
+    var geometry = BoxGeometry.fromAxisAlignedBoundingBox( new AxisAlignedBoundingBox(minCorner,maxCorner));
+    //geometry.options.material = Color.BLUE;
+    // we need an orientation
+    var entity = this.viewer.entities.add({name: 'Test', box: { dimensions: new Cartesian3(width,length,height), material: Color.BLACK }, position: point, show: true,      availability: timeIntervals});
+    /*var sphereEntity = this.viewer.entities.add({
+      name: "Added Sphere",
+      position: Cartesian3.fromDegrees(longitude, latitude),
+      ellipsoid: {
+        radii: new Cartesian3(size, size, size),
+        fill: true,
+        outline: false,
+        material: Color.RED.withAlpha(0.5)
+      },
+      show: true,
+      availability: timeIntervals
+    });*/
+    this.viewer.camera.flyTo({destination:Cartesian3.fromDegrees(longitude, latitude)});
+    
+    return entity;
   };
 
   hideEverything() {
