@@ -84,7 +84,7 @@ export class RendererComponent implements AfterViewInit {
     //  y: data.y, z: data.z, intensity: data.intensity,
     //  objects: value.objects, payload: null, latitude: value.latitude, longitude: value.longitude, forwarddirection: value.forwarddirection
     //};
-    console.log(value.topic);
+    //console.log(value.topic);
     this.pointClouds[value.topic] = {
       time: value.time, topic: value.topic, x: data.x,
       y: data.y, z: data.z, intensity: data.intensity,
@@ -121,23 +121,10 @@ export class RendererComponent implements AfterViewInit {
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffff00 });
     var sphere = new Mesh(sphereGeometry, sphereMaterial);
     var camera = this._cesiumService.getCesiumCamera();
-    
     var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
-    //var ent = this._cesiumService.addEntity(-119.81854309810514,39.5438915231015,30);
-    //console.log('position: ' + ent.position.getValue(JulianDate.now()));
-    //4039062.5175966527
-    var position = Cartographic.toCartesian(displacement);
-    console.log(displacement);
-    console.log(position);
-    //position.z = 4035728.60582164;
-    sphere.position.set(position.x,position.y,position.z);
-    console.log('position (three): ' + position);
-    //console.log('up ' + ent.orientation);
-    console.log('up (three): ' + sphere.up.x + ' ' + sphere.up.y + ' ' + sphere.up.z);
-    //camera.worldToCameraCoordinates()
-    //sphere.position.set(-2445899.5048352405, -4276740.309637379, 4037498.5638592127);
 
-    //this.sphere.push(sphere);
+    var position = Cartographic.toCartesian(displacement);
+    sphere.position.set(position.x,position.y,position.z);
 
     var sphereMaterial = new MeshBasicMaterial({ color: 0xffffff });
     sphere = new Mesh(sphereGeometry, sphereMaterial);
@@ -164,41 +151,8 @@ export class RendererComponent implements AfterViewInit {
     var material = new PointsMaterial({ size: this.ds.pointSizeValue, color: 0xffffff, vertexColors: true });
     this.pcdPoints = new Points(geometry, material);
     this.pcdScene.add(this.pcdPoints);
-    //this.sphere.needsUpdate = true;
     this.sphere.forEach((sphere) => { this.pcdScene.add(sphere); })
 
-
-
-    //this.pcdScene.background = null;
-
-
-    //this.pcamera.updateProjectionMatrix();
-    //Easting: 257759.0015798236, Northing: 5619067.676596848
-    
-    //this.pcamera.position.set(257759.0015798236, 5619067.676596848-25, 0);
-    //this.pcamera.lookAt(0,0,0);
-    //this.pcamera.updateMatrix();
-    //this.pcamera.updateProjectionMatrix();
-
-    //this.controls = new OrbitControls(this.pcamera, this.canvas);
-    //this.controls.autoRotate = false;
-    //this.controls.enableZoom = true;
-    //this.controls.enablePan = true;
-    //this.controls.target.set(257759.00158, 4380932.3234,0);
-    //this.controls.update();
-
-    //this.pcamera.position.set(257759.00158, 4380932.3234,25);
-    //this.controls.update();
-
-    //this.pcamera.position.set(0,0,25);
-    //this.controls.target.set(0,0,0);
-    //this.controls.update();
-
-
-
-    // Reset Camera position after controls update
-    //this.pcamera.position.x = 0;
-    //this.pcamera.position.z = 30;
     var self = this;
     // Function runs animate outside of Angular to not overload the app
     this.zone.runOutsideAngular(_ => {
@@ -212,25 +166,14 @@ export class RendererComponent implements AfterViewInit {
 
           stats.begin();
 
-          //if (this.pointClouds.key) { 
-
-
           var camera = this._cesiumService.getCesiumCamera()
+
+          // here we are updating the three.js camera to match cesiums!
           this.pcamera.fov = math.toDegrees((camera.frustum as PerspectiveFrustum).fovy); // ThreeJS FOV is vertical
-          //this.pcamera.aspect = (camera.frustum as PerspectiveFrustum).aspectRatio;
           this.pcamera.updateProjectionMatrix();
-          //this.pcamera.fov
-          //this.pcamera.PerspectiveFrustum.fovy
           var cvm = camera.viewMatrix;
           var civm = camera.inverseViewMatrix;
-          //this.pcamera.up.set(camera.up.x,camera.up.y,camera.up.z);
           this.pcamera.position.set(camera.position.x,camera.position.y,camera.position.z);
-          console.log(camera.frustum);
-          console.log(camera.position);
-          console.log(camera.positionWC);
-          console.log(camera.positionCartographic);
-          //console.log(cvm)
-          //console.log(civm);
           this.pcamera.matrixAutoUpdate = false;
           this.pcamera.matrixWorld.set(
             civm[0], civm[4], civm[8 ], civm[12],
@@ -244,28 +187,10 @@ export class RendererComponent implements AfterViewInit {
             cvm[2], cvm[6], cvm[10], cvm[14],
             cvm[3], cvm[7], cvm[11], cvm[15]
           );
-
-          //this.pcamera.up.set(camera.up.x,camera.up.y,camera.up.z);
-
-          //this.pcamera.lookAt(new Vector3(0,0,0));
-          //this.pcamera.updateMatrix()
-          
-          //this.pcamera.matrix.set(camera.transform[0],camera.transform[1],camera.transform[2],camera.transform[3],
-          //  camera.transform[4],camera.transform[5],camera.transform[6],camera.transform[7],
-          //  camera.transform[8],camera.transform[9],camera.transform[10],camera.transform[11],
-          //  camera.transform[12],camera.transform[13],camera.transform[14],camera.transform[15]);
-          //console.log(this.pcamera.position);
-          //camera.c
-          //console.log(camera.worldToCameraCoordinatesPoint(this.pcamera.position));
-          //this.sphere[0].position
           this.updateBuffer();
-          //this.controls.update();
+
           var displacement = Cartographic.fromDegrees(-119.81854309810514,39.5438915231015);
           var position = Cartographic.toCartesian(displacement);
-          console.log(4035728.60582164,this.sphere[0].position,position);
-          
-          //}
-
           
           this.render();
           stats.end();
@@ -303,6 +228,8 @@ export class RendererComponent implements AfterViewInit {
       var pointCloud = this.pointClouds[topic];
       var pcdPoints = this.pcdPointsArray[topic];
       var vertices = [];
+
+      // parsing out latitude and longitude from sensor
       var latitude = parseFloat(pointCloud['latitude']);
       if (pointCloud['latitude'].indexOf('S') > -1)
       {
@@ -313,11 +240,11 @@ export class RendererComponent implements AfterViewInit {
       {
         longitude = - longitude;
       }
-      console.log(latitude,longitude);
       
       var utm = this.utmConvert.convertLatLngToUtm(latitude,longitude,5);
       this.utmConvert.convertLatLngToUtm()
-      console.log(utm);
+
+
       var vertX = pointCloud['x'];
       var vertY = pointCloud['y'];
       var vertZ = pointCloud['z'];
@@ -327,45 +254,26 @@ export class RendererComponent implements AfterViewInit {
       const carColorP = new Color(this.ds.carColor); // Color for Cars
       const pedColorP = new Color(this.ds.pedestrianColor); // Color for Pedestrians
 
-      console.log(pointCloud['forwarddirection']);
-      console.log('ttttttttttttttttt')
-      console.log(utm);
-      console.log(utm['Easting'],utm['Northing']);
-      //257759.0015798236, 5619067.676596848
-
-
+      // taking latitude, longitude grabbed from lidar sensor compute a position in cesium coordinates -- TODO: Make a helper for this maybe
       var displacement = Cartographic.fromDegrees(longitude,latitude);
       var position = Cartographic.toCartesian(displacement);
-      
-      //if (pointCloud['forwarddirection']) {
-      //  pcdPoints.rotation.set(0, 0, 3.14 / 180.0 * pointCloud['forwarddirection']);
-      //}
-      //pcdPoints.updateMatrix();
-
-      //pcdPoints.position.set(position.x,position.y,position.z);
-      //pcdPoints.updateMatrix();
-      
-      //ConvertLatLngToUtm(1,1,1);
-      //this.pcdPoints.rotateZ(3.14 / 2)
-      //console.log(vertX);
-      //console.log(boundBox);
+      var zAxis = new Vector3(0,0,1);
       if (vertX)
         for (var i = 0; i < vertX.length; i++) {
-          var out = this.utmConvert.convertUtmToLatLng(utm['Easting']+vertX[i],utm['Northing']+vertY[i],11,utm['ZoneLetter']);
+          // Rotating points coming from lidar sensor based on the known direction the sensor is facing in the real world
+          var positionPoint = new Vector3(vertX[i],vertY[i],vertZ[i]);
+          positionPoint.applyAxisAngle(zAxis, 3.14 / 180.0 * pointCloud['forwarddirection']);
+
+          // Translate lidar data based on the offsets coming from the sensors
+          // first offset then convert to lat long
+          var out = this.utmConvert.convertUtmToLatLng(utm['Easting']+positionPoint.x,utm['Northing']+positionPoint.y,11,utm['ZoneLetter']);
+          
+          // bring the lat long into cesium
           var displacement = Cartographic.fromDegrees(out.lng,out.lat,Math.abs(vertZ[i]));
           
+          // converting to cartesian system of cesium
           var position = Cartographic.toCartesian(displacement);
-          var output = Cartographic.fromCartesian(new Cartesian3(position.x,position.y,position.z));
-          if (i == 0)
-          console.log('position',position.x,position.y,position.z);
-          if(i==0) {
-            console.log(this.utmConvert.convertUtmToLatLng(utm['Easting']+vertX[i],utm['Northing']+vertY[i],11,utm['ZoneLetter']));
-            console.log(latitude,longitude);
-          }
-          position = Cartographic.toCartesian(output);
-          if (i == 0)
-          console.log(position.x,position.y,position.z);
-          //position = Cartographic.fromRadians(output.)
+          
           pcdPoints.geometry.attributes.position.setXYZ(i, position.x, position.y, position.z);
           pcdPoints.geometry.attributes.color.setXYZ(i, colorPicked.r, colorPicked.g, colorPicked.b);
 
@@ -398,8 +306,6 @@ export class RendererComponent implements AfterViewInit {
       pcdPoints.geometry.setDrawRange(0, vertX.length);
       pcdPoints.geometry.computeBoundingSphere();
     }
-    //this.sphere.geometry.attributes.position.needsUpdate = true;
-    //this.sphere.geometry.attributes.color.needsUpdate = true;
   }
 
   // Function that updates the position and color of the points
@@ -408,24 +314,14 @@ export class RendererComponent implements AfterViewInit {
     this.updatePointCloud(this.topic);
     if(this.topic && this.newTopicFirst)
     { 
-      console.log(this.pcdPointsArray[this.topic].position);
       this.pcamera.position.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,25);
-      //this.controls.update();
-
-      //this.controls.target.set(this.pcdPointsArray[this.topic].position.x,this.pcdPointsArray[this.topic].position.y,this.pcdPointsArray[this.topic].position.z);
-      //this.controls.update();
       this.newTopicFirst = false;
-      
     }
 
     this.updatePointCloud(this.topic2);
     if(this.topic2 && this.newTopicSecond)
     { 
       this.pcamera.position.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,25);
-      //this.controls.update();
-
-      //this.controls.target.set(this.pcdPointsArray[this.topic2].position.x,this.pcdPointsArray[this.topic2].position.y,this.pcdPointsArray[this.topic2].position.z);
-     //this.controls.update();
       this.newTopicSecond = false;
     }
   }
@@ -437,7 +333,6 @@ export class RendererComponent implements AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     var self = this;
-    //console.log(changes.topic.currentValue);
 
     if (changes.topic && this.ms && changes.topic.currentValue in this.ms.subjects) {
       if (changes.topic.previousValue in this.subscriptions) {
@@ -478,15 +373,9 @@ export class RendererComponent implements AfterViewInit {
     for (const key in this.subscriptions) {
       this.subscriptions[key].unsubscribe();
     }
-
-
-    //this.ms.testSubject.unsubscribe();
   }
 
   submit() {
     console.log("Data Explorer Form Submitted");
-    //this.ds.selectedTopic = this.explorerForm.value.topic;
-    //this.ms.subscribe(this.explorerForm.value.topic);
-    //this.router.navigateByUrl('/visualizations');
   }
 }
