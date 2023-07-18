@@ -20,21 +20,31 @@ export class CesiumViewerComponent {
   }
   click() {
     this.cesiumService.addExampleEntity();
-    this.httpClient.get('http://localhost:5000/trajectoryinfo').subscribe((response: any) => { 
+    
+    this.httpClient.get('http://localhost:5000/trajectoryinfo?limit=10&classtype=1').subscribe((response: any) => { 
       //console.log(response[0]); 
+      var min = null;
       for(let i=0; i<response.length; i++) {
+        console.log(response[i]);
         console.log(response[i].longitude,response[i].latitude);
         console.log(response[i].frametime);
+        if(min == null)
+          min = JulianDate.fromIso8601(response[i].frametime);
+        else if (JulianDate.lessThan(JulianDate.fromIso8601(response[i].frametime),min))
+          min = JulianDate.fromIso8601(response[i].frametime);
         console.log(JulianDate.fromIso8601(response[i].frametime));
-        var clock = this.cesiumService.viewer.clock;
-        clock.currentTime = JulianDate.fromIso8601(response[i].frametime);
-        clock.multiplier = 0;
-        var start = JulianDate.fromIso8601(response[i].frametime);
-        var end = JulianDate.addSeconds(start, 1, new JulianDate());
-        //this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1,start,end);
 
-        this.cesiumService.addBoundingBox(response[i].longitude,response[i].latitude,1,response[i].dir_x_bbox,response[i].dir_y_bbox,response[i].width,response[i].length,response[i].height,start,end);
+        var start = JulianDate.fromIso8601(response[i].frametime);
+        var end = JulianDate.addSeconds(start, 10, new JulianDate());
+        //this.cesiumService.addEntity(response[i].longitude,response[i].latitude, .1,start,end);
+        
+        this.cesiumService.addBoundingBox(response[i].longitude,response[i].latitude,1,response[i].dir_x_bbox,response[i].dir_y_bbox,response[i].width,response[i].length,response[i].height, response[i].direction, start,end);
       }
+      var clock = this.cesiumService.viewer.clock;
+      console.log('min')
+      console.log(min);
+      clock.currentTime = min;
+      clock.multiplier = 0;
     });
     console.log(this.range.controls.start.value, this.range.controls.end.value);
   }

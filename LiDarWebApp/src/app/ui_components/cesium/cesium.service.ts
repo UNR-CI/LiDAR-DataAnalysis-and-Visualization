@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { createDecoderModule, draco } from 'draco3d';
-import { Viewer, Cartesian3, Color, BoxGeometry, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen, Spherical, AxisAlignedBoundingBox } from 'cesium';
+import { ConstantProperty,Transforms, HeadingPitchRoll,Viewer, Cartesian3, Color, BoxGeometry, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen, Spherical, AxisAlignedBoundingBox, Math as math } from 'cesium';
 import { NonNullableFormBuilder } from '@angular/forms';
 
 @Injectable({
@@ -69,7 +69,7 @@ export class CesiumService {
     return sphereEntity;
   };
 
-  addBoundingBox(longitude:number,latitude:number,size:number,dir_x_bbox:number,dir_y_bbox:number, width:number, length:number, height:number, startTime:JulianDate=null,endTime:JulianDate=null){
+  addBoundingBox(longitude:number,latitude:number,size:number,dir_x_bbox:number,dir_y_bbox:number, width:number, length:number, height:number, angle:number, startTime:JulianDate=null,endTime:JulianDate=null){
     var timeIntervals = new TimeIntervalCollection();
     if (startTime != null) {
       timeIntervals.addInterval(new TimeInterval({
@@ -93,7 +93,13 @@ export class CesiumService {
     var geometry = BoxGeometry.fromAxisAlignedBoundingBox( new AxisAlignedBoundingBox(minCorner,maxCorner));
     //geometry.options.material = Color.BLUE;
     // we need an orientation
-    var entity = this.viewer.entities.add({name: 'Test', box: { dimensions: new Cartesian3(width,length,height), material: Color.BLACK }, position: point, show: true,      availability: timeIntervals});
+    console.log('angle',angle);
+    console.log('whl',width,height,length);
+    var hpr = new HeadingPitchRoll(math.toRadians(angle),0,0);
+
+    const orientation2 = new ConstantProperty(Transforms.headingPitchRollQuaternion(point,hpr));
+    var entity = this.viewer.entities.add({name: 'Test', orientation: orientation2, box: { dimensions: new Cartesian3(width,length,height), 
+      material: Color.BLACK }, position: point, show: true,      availability: timeIntervals});
     /*var sphereEntity = this.viewer.entities.add({
       name: "Added Sphere",
       position: Cartesian3.fromDegrees(longitude, latitude),
