@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { createDecoderModule, draco } from 'draco3d';
 import { ConstantProperty,Transforms, HeadingPitchRoll,Viewer, Cartesian3, Color, BoxGeometry, PolygonHierarchy, DataSource, TimeInterval, SampledProperty, VelocityOrientationProperty, HermitePolynomialApproximation, TimeIntervalCollection, JulianDate, PathGraphics, PolylineGlowMaterialProperty, SampledPositionProperty, Fullscreen, Spherical, AxisAlignedBoundingBox, Math as math } from 'cesium';
 import { NonNullableFormBuilder } from '@angular/forms';
+import { getType } from '@angular/flex-layout/extended/style/style-transforms';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,11 @@ export class CesiumService {
   client: HttpClient;
 
   viewer: Viewer = null;
+
+  valueToColorMap:Map<number, Color> = new Map<number, Color>([[0,Color.RED],[1,Color.BLACK],[2,Color.GREEN],[3,Color.BLUE],[4,Color.YELLOW],[5,Color.ORANGE]]);
+
+
+
   constructor(private http: HttpClient) {
 
   }
@@ -61,15 +67,15 @@ export class CesiumService {
         outline: false,
         material: Color.RED.withAlpha(0.5)
       },
-      show: true,
-      availability: timeIntervals
+      show: true//,
+      //availability: timeIntervals
     });
     this.viewer.camera.flyTo({destination:Cartesian3.fromDegrees(longitude, latitude)});
     
     return sphereEntity;
   };
 
-  addBoundingBox(longitude:number,latitude:number,size:number,dir_x_bbox:number,dir_y_bbox:number, width:number, length:number, height:number, angle:number, startTime:JulianDate=null,endTime:JulianDate=null){
+  addBoundingBox(classType:number,longitude:number,latitude:number,size:number,dir_x_bbox:number,dir_y_bbox:number, width:number, length:number, height:number, angle:number, startTime:JulianDate=null,endTime:JulianDate=null){
     var timeIntervals = new TimeIntervalCollection();
     if (startTime != null) {
       timeIntervals.addInterval(new TimeInterval({
@@ -98,8 +104,11 @@ export class CesiumService {
     var hpr = new HeadingPitchRoll(math.toRadians(angle),0,0);
 
     const orientation2 = new ConstantProperty(Transforms.headingPitchRollQuaternion(point,hpr));
+
     var entity = this.viewer.entities.add({name: 'Test', orientation: orientation2, box: { dimensions: new Cartesian3(width,length,height), 
-      material: Color.BLACK }, position: point, show: true,      availability: timeIntervals});
+      material: this.valueToColorMap.get(classType) }, position: point, show: true,      
+      //availability: timeIntervals
+    });
     /*var sphereEntity = this.viewer.entities.add({
       name: "Added Sphere",
       position: Cartesian3.fromDegrees(longitude, latitude),

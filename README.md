@@ -25,3 +25,10 @@ Follow the steps to build and run the application from the Linux terminal.
 3. Run the Docker containers. The -d flag means the containers will run in a detached state.
     ```
     docker-compose up -d
+
+
+-- To run a quick development server
+```bash
+    cd LidarWebApp
+    ng serve -c quick
+```
